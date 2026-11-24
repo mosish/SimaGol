@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+node_modules/
+vendor/
+*.log
+*.zip
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+data/
+build/
