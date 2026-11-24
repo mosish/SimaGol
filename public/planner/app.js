@@ -12,6 +12,8 @@ const copy = {
   moreOptions:['موارد دیگر','More options'], customShort:['دلخواه','Custom'], flowerShort:['سفارش گل','Flowers'],
   calendarView:['تقویم','Calendar'],
   addReminder:['افزودن یادآوری','Add reminder'],
+  addOnDay:['برای این روز مناسبتی ثبت کن','Add an occasion for this day'],
+  anotherOnDay:['مناسبت جدید','New occasion'],
 
   legacy:['انتقال مناسبت‌های قبلی این مرورگر','Import previous browser occasions'],
   regionalList:['مناسبت‌های این ماه','Occasions this month'],
@@ -305,7 +307,9 @@ function calendar() {
   $('#days').innerHTML=cells.join('');
   $('#selected-title').textContent=dateText(selected,{weekday:'long',month:'long',day:'numeric'});
   const picked=rows.filter(x=>x.date===selected && !(x.source==='holiday' && model.entries.some(e=>e.holidayId===x.id)));
-  $('#selected').innerHTML=picked.map(x=>x.source==='holiday'?holidayRow(x,false):eventRow(x)).join('')||'<p class="hint">'+text('noDay')+'</p>';
+  const dayEvents=picked.map(x=>x.source==='holiday'?holidayRow(x,false):eventRow(x)).join('');
+  const addLabel=text(picked.length?'anotherOnDay':'addOnDay');
+  $('#selected').innerHTML=dayEvents+'<button type="button" class="add-on-day" data-add-on-day aria-haspopup="dialog"><span>'+addLabel+'</span><b aria-hidden="true">+</b></button>';
   $('#regional').innerHTML=rows.filter(x=>x.source==='holiday').map(h=>holidayRow(h)).join('')||text('noDay');
   $('#sheet-title').textContent=$('#selected-title').textContent;
   $('#sheet-events').innerHTML=$('#selected').innerHTML;
@@ -435,6 +439,7 @@ document.addEventListener('click',event=>{
   if(!b) return;
   if(b.dataset.day) { selected=b.dataset.day;calendar();document.querySelector('[data-day="'+selected+'"]')?.focus({preventScroll:true}); if(matchMedia('(max-width:760px)').matches)$('#day-sheet').showModal(); }
   if(b.dataset.choose){const [id,date]=b.dataset.choose.split('@');openEditor(undefined,{...HOLIDAYS.find(x=>x.id===id),date});}
+  if(b.hasAttribute('data-add-on-day'))openEditor(undefined,undefined,'custom');
   if(b.dataset.edit) { const entry=model.entries.find(x=>x.id===b.dataset.edit);if(entry)openEditor(entry); }
   if(b.dataset.delete) {
     deleteTarget=b.dataset.delete;

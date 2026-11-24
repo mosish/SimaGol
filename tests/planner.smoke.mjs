@@ -67,6 +67,12 @@ try {
   await page.locator('#cancel').click();
   await page.locator('#calendar-system [value=gregory]').check();
   assert.equal(await page.locator('.days [aria-pressed=true]').getAttribute('data-day'),'2026-03-21');
+  await page.locator('[data-day="2026-03-21"]').click();
+  await page.locator('#sheet-events').getByRole('button',{name:'New occasion',exact:true}).click();
+  assert.equal(await input('date').inputValue(),'2026/03/21');
+  assert.equal(await editor.getAttribute('data-holiday'),'');
+  assert.ok(await editor.locator('[value=custom]').isChecked());
+  await page.locator('#cancel').click();
   await page.locator('[data-tab=plus]').click();
   for(const type of ['anniversary','custom','birthday']){
     await page.locator('[data-quick="'+type+'"]').click();
@@ -168,6 +174,25 @@ try {
   await guest.locator('#editor[open]').waitFor();
   assert.equal(await guest.locator('#event-form [name=type]:checked').inputValue(),'anniversary');
   await guest.close();
+  const desktop=await browser.newPage({viewport:{width:1280,height:800}});
+  await desktop.goto(origin+'/planner/');
+  await desktop.locator('#language [value=en]').check();
+  await desktop.locator('#days [data-day]:not(.has-events):enabled').first().click();
+  const selectedDate=await desktop.locator('#days [aria-pressed=true]').getAttribute('data-day');
+  await desktop.locator('#selected').getByRole('button',{name:'Add an occasion for this day'}).click();
+  await desktop.waitForURL('**/#account/planner-login');
+  await desktop.locator('[name=email]').fill('planner@example.test');
+  await desktop.locator('[name=password]').fill('test-only-flower-planner');
+  await desktop.locator('.auth-card [type=submit]').click();
+  await desktop.locator('#editor[open]').waitFor();
+  assert.equal(await desktop.locator('#days [aria-pressed=true]').getAttribute('data-day'),selectedDate);
+  assert.ok(await desktop.locator('#event-form [value=custom]').isChecked());
+  await desktop.locator('#event-form [name=name]').fill('Tea with family');
+  await desktop.locator('#event-form [type=submit]').click();
+  await desktop.locator('.planner-views [href="#calendar"]').click();
+  await desktop.locator('#selected').getByRole('heading',{name:'Tea with family'}).waitFor();
+  await desktop.locator('#selected').getByRole('button',{name:'New occasion',exact:true}).waitFor();
+  await desktop.close();
   assert.deepEqual(pageErrors,[]);
   console.log('Mobile Chromium verified planner CRUD, Solar/Gregorian selection and authenticated saves, standalone manifest, offline reload and offline edits.');
 } finally {
