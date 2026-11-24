@@ -12,6 +12,7 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
+      TRUST_PROXY_ADDRESS: ${TRUST_PROXY_ADDRESS:-}
       DATA_DIR: /app/data
       APP_ORIGIN: ${APP_ORIGIN:?Set the public HTTPS origin in .env}
       ORDERS_ENABLED: ${ORDERS_ENABLED:-false}

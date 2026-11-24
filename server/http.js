@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { isIP } from 'node:net';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { catalog, settings } from './db.js';
@@ -40,7 +41,7 @@ async function media(dir, data) {
   return {path:'uploads/'+name};
 }
 
-export function createHandler({db,dir,origin,production,ordersEnabled}) {
+export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy}) {
   const attempts=new Map();
   function throttle(ip) {
     const now=Date.now();
@@ -111,7 +112,12 @@ export function createHandler({db,dir,origin,production,ordersEnabled}) {
       if(method!=='POST') fail(405,'Method unavailable');
       if(req.headers.origin!==origin || req.headers['x-simagol']!=='1') fail(403,'Access denied');
       if(req.headers['content-type']?.split(';')[0]!=='application/json') fail(415,'Invalid input');
-      if(key==='login'||key==='register') throttle(req.socket.remoteAddress);
+      if(key==='login'||key==='register') {
+        const peer=req.socket.remoteAddress;
+        const forwarded=req.headers['x-real-ip'];
+        const fromProxy=trustedProxy && peer===trustedProxy && typeof forwarded==='string' && isIP(forwarded);
+        throttle(fromProxy?forwarded:peer);
+      }
       if(key==='admin/upload') permit(['owner','editor']);
       const b=await bodyOf(req,key==='admin/upload'?2900000:64000);
       const cookie=(value,seconds)=>res.setHeader('Set-Cookie','sg_session='+value+'; Max-Age='+seconds+'; Path=/; HttpOnly; SameSite=Lax'+(production?'; Secure':''));
