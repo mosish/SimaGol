@@ -57,6 +57,11 @@ test('partial profile updates preserve other fields and reject invalid values', 
   const updated = profile(db, id, { prefs: { lang: 'en' } });
   assert.deepEqual(updated.addresses, ['نارمک']);
   assert.deepEqual(updated.prefs, { lang: 'en', dark: true });
+  const card={address:'North street',city:'Tehran',recipient:'Test buyer'};
+  profile(db,id,{addresses:[card,'Earlier address'],contact:{family:'Rose',city:'Tehran'}});
+  assert.deepEqual(profile(db,id,{contact:{phone:'09120000000'}}).addresses,[card,'Earlier address']);
+  assert.equal(profile(db,id,{prefs:{lang:'en'}}).prefs.contact.family,'Rose');
+  assert.throws(()=>profile(db,id,{contact:{birthday:'2000-02-31'}}),status(400));
   assert.throws(() => profile(db, id, { prefs: { dark: 'false' } }), status(400));
   assert.throws(() => profile(db, id, { addresses: [''] }), status(400));
 });

@@ -26,7 +26,7 @@ test('standalone shell, PNG dimensions and iOS launch assets are consistent',()=
 test('offline install caches the working planner without private endpoints',async()=>{
   const handlers={};let paths;
   const code=readFileSync(prefix+'sw.js','utf8');
-  const context={self:{location:{origin:'https://shop.example'},addEventListener:(type,fn)=>handlers[type]=fn},
+  const context={self:{skipWaiting:async()=>{},location:{origin:'https://shop.example'},addEventListener:(type,fn)=>handlers[type]=fn},
     caches:{open:async()=>({addAll:async list=>{paths=list.map(r=>r.path)}})},
     Request:class{constructor(path){this.path=path}},URL};
   vm.runInNewContext(code,context);

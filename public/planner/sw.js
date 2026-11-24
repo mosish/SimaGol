@@ -1,5 +1,5 @@
 // Bump this version when changing an asset in a source deployment.
-const cacheName = 'simagol-planner-shell-v3';
+const cacheName = 'simagol-planner-shell-v4';
 const shell = '/planner/';
 const assets = [
   shell, '/planner/index.html', '/planner/manifest.json', '/planner/planner.css',
@@ -16,7 +16,7 @@ const cachedPaths = new Set(assets);
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(cacheName).then(cache =>
     cache.addAll(assets.map(path => new Request(path, {cache:'reload'})))
-  ));
+  ).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
@@ -31,6 +31,13 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || url.origin !== self.location.origin || !cachedPaths.has(url.pathname)) return;
   event.respondWith((async () => {
     const cache = await caches.open(cacheName);
+    // Local development serves the current checkout on each online visit.
+    if (['127.0.0.1','localhost','[::1]'].includes(url.hostname)) {
+      try {
+        const fresh=await fetch(event.request,{cache:'no-store'});
+        if(fresh.ok) { await cache.put(url.pathname,fresh.clone()); return fresh; }
+      } catch { /* Use the installed shell while offline. */ }
+    }
     const cached = await cache.match(url.pathname);
     return cached || fetch(event.request);
   })());

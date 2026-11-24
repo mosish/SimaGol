@@ -13,9 +13,10 @@ export function checkout() {
   if(!selectedItems().length) return '<h2>'+label('Your bag is empty')+'</h2>';
   const methods=Object.entries(state.settings.delivery).filter(([id,v])=>v.enabled && (id!=='scheduled' || openSlots().length));
   if(!methods.length) return '<p>'+label('Delivery unavailable')+'</p>';
-  return '<h2>'+label('Checkout')+'</h2><form data-form="checkout">'+field('recipient','Recipient',state.me.name)+field('phone','Phone','','tel')+
-    select('saved','Address book',[['',t('Enter an address')],...state.me.addresses.map((a,i)=>[String(i),a])])+
-    field('address','Delivery address')+select('method','Delivery',methods.map(([id,v])=>[id,t(id)+' · '+price(v.fee)]))+
+  const saved=addressDetails(state.me.addresses[0]||'');
+  return '<h2>'+label('Checkout')+'</h2><form data-form="checkout">'+field('recipient','Recipient',saved.recipient||state.me.name)+field('phone','Phone',saved.phone||state.me.prefs?.contact?.phone||'','tel')+
+    select('saved','Address book',[['',t('Enter an address')],...state.me.addresses.map((a,i)=>[String(i),deliveryText(a)])],state.me.addresses.length?'0':'')+
+    field('address','Delivery address',deliveryText(saved))+select('method','Delivery',methods.map(([id,v])=>[id,t(id)+' · '+price(v.fee)]))+
     '<div id="slot-field"></div><label><input type="checkbox" name="wrap"> '+label('Gift wrap')+' · '+esc(price(state.settings.wrapFee))+'</label>'+
     field('message','Card message','','text',false)+'<p>'+label('Payment on delivery')+'</p><strong id="checkout-total"></strong>'+button('Place order')+'</form>';
 }
@@ -46,25 +47,55 @@ export function notificationList(notices) {
   return '<ul>'+entries.join('')+'</ul>'+action;
 }
 const sections = [
-  ['personal','Personal details','profile'], ['orders','My orders','orders'],
-  ['addresses','My addresses','pin'], ['favorites','Favorites','heart'], ['notifications','Notifications','bell']
+  ['wallet','Wallet','wallet'], ['orders','My orders','orders'], ['addresses','My addresses','pin'],
+  ['favorites','Favorites','bookmark'], ['notifications','Notifications','bell']
 ];
 const statuses=['placed','preparing','shipped','delivered','cancelled'];
-
-function personalPanel() {
-  const {name,email}=state.me;
-  return '<dl class="profile-fields"><div><dt>'+label('Name')+'</dt><dd>'+esc(name)+'</dd></div><div><dt>'+label('Email')+'</dt><dd><bdi>'+esc(email)+'</bdi></dd></div></dl>'+
-    '<details><summary>'+label('Edit details')+'</summary><form data-form="profile">'+field('name','Name',name)+button('Save')+'</form></details>';
+export function addressDetails(value) { return typeof value==='string'?{address:value}:value; }
+export function deliveryText(value) {
+  const a=addressDetails(value);
+  return [a.city,a.address,a.postal].filter(Boolean).join('، ');
 }
-function addressForm(index,value) {
-  return '<form data-form="address"><input type="hidden" name="index" value="'+index+'"><label>'+label('Delivery address')+
-    '<textarea name="address" maxlength="500" required>'+esc(value)+'</textarea></label>'+button('Save')+'</form>';
+function detailCell(title,value) {
+  return '<div><dt>'+label(title)+'</dt><dd><bdi>'+esc(value||'—')+'</bdi></dd></div>';
 }
-function addressPanel() {
-  const addresses=state.me.addresses;
-  return (addresses.map((value,i)=>'<article class="address-card"><p>'+icon('pin')+esc(value)+'</p><details><summary>'+label('Edit')+'</summary>'+
-    addressForm(i,value)+'</details><button type="button" data-delete-address="'+i+'">'+label('Remove')+'</button></article>').join('')||'<p>'+label('No saved addresses')+'</p>')+
-    '<details><summary>'+label('Add address')+'</summary>'+addressForm(-1,'')+'</details>';
+function panelHeading(title,action='',count='') {
+  return '<div class="account-heading"><h2>'+label(title)+(count?' <small>'+esc(count)+'</small>':'')+'</h2>'+action+'</div>';
+}
+function actionLink(href,title,glyph) {
+  return '<a class="account-action" href="'+href+'">'+icon(glyph)+label(title)+'</a>';
+}
+function personalPanel(mode) {
+  const {name,email,prefs}=state.me, c=prefs?.contact||{};
+  if(mode==='edit') return panelHeading('Edit details')+'<form class="contact-form" data-form="profile">'+
+    field('name','Name',name)+field('family','Family name',c.family,'text',false)+field('phone','Mobile number',c.phone,'tel',false)+
+    field('birthday','Birthday',c.birthday,'date',false)+field('city','City',c.city,'text',false)+
+    '<div class="form-actions">'+button('Save')+'<a href="#account/personal">'+label('Cancel edit')+'</a></div></form>';
+  const birthday=c.birthday?new Intl.DateTimeFormat(state.lang,{dateStyle:'medium',timeZone:'UTC'}).format(new Date(c.birthday)):'';
+  return panelHeading('Personal details',actionLink('#account/personal/edit','Edit details','edit'))+
+    '<dl class="profile-fields">'+detailCell('Name',name)+detailCell('Family name',c.family)+detailCell('Mobile number',c.phone)+
+    detailCell('Birthday',birthday)+detailCell('Email',email)+detailCell('City',c.city)+'</dl>'+
+    '<section class="account-block"><h3>'+label('Referral code')+'</h3><form class="referral-form" data-form="referral"><input aria-label="'+label('Referral code')+'" maxlength="40" name="referral" value="'+esc(c.referral)+'">'+button('Save')+'</form></section>';
+}
+function addressForm(index,a) {
+  return '<form class="contact-form" data-form="address"><input type="hidden" name="index" value="'+index+'">'+
+    field('title','Address title',a.title,'text',false)+field('city','City',a.city,'text',false)+
+    field('recipient','Recipient',a.recipient,'text',false)+field('phone','Mobile number',a.phone,'tel',false)+field('postal','Postal code',a.postal,'text',false)+
+    '<label class="wide">'+label('Delivery address')+'<textarea name="address" maxlength="500" required>'+esc(a.address)+'</textarea></label>'+
+    '<div class="form-actions">'+button('Save')+'<a href="#account/addresses">'+label('Cancel edit')+'</a></div></form>';
+}
+function addressPanel(mode) {
+  const rows=state.me.addresses.map(addressDetails);
+  if(mode==='new') return panelHeading('Add address')+addressForm(-1,{});
+  const match=/^edit-(\d+)$/.exec(mode);
+  if(match && rows[Number(match[1])]) return panelHeading('Edit address')+addressForm(Number(match[1]),rows[Number(match[1])]);
+  return panelHeading('My addresses',actionLink('#account/addresses/new','Add address','plus'),'('+num(rows.length)+')')+
+    (rows.map((a,i)=>'<article class="address-card"><div class="address-bar"><strong>'+esc(a.title||a.city||t('Delivery address'))+'</strong>'+
+      (i===0?'<span class="default-address">'+label('Default address')+'</span>':'')+'<div class="address-actions">'+
+      actionLink('#account/addresses/edit-'+i,'Edit','edit')+'<button class="danger-link" data-delete-address="'+i+'">'+icon('trash')+label('Remove')+'</button></div></div>'+
+      '<p>'+esc(a.address)+'</p><dl class="address-meta">'+detailCell('City',a.city)+detailCell('Postal code',a.postal)+detailCell('Recipient',a.recipient)+detailCell('Phone',a.phone)+'</dl>'+
+      (i>0?'<button class="default-action" data-default-address="'+i+'">'+label('Make default')+'</button>':'')+'</article>').join('')||
+      '<div class="profile-empty">'+icon('pin')+'<p>'+label('No saved addresses')+'</p></div>');
 }
 export function orderList(rows,filter) {
   const filtered=statuses.includes(filter)?rows.filter(o=>o.status===filter):rows;
@@ -78,19 +109,25 @@ function savedFlowers() {
   const products=state.catalog.products.filter(p=>state.favorites.includes(p.id));
   return products.map(p=>'<a class="saved-flower" href="#product/'+esc(p.id)+'"><img src="/'+esc(p.image)+'" alt=""><span>'+esc(p.name[state.lang])+'</span><b>'+esc(price(p.priceIrr))+'</b></a>').join('') || '<p>'+label('No saved flowers')+'</p><a href="/">'+label('Browse flowers')+'</a>';
 }
-export async function account(section='personal',filter='all') {
+export async function account(section='personal',mode='') {
   if(!state.me) return auth();
-  const current=sections.find(([key])=>key===section)||sections[0];
+  const current=sections.find(([key])=>key===section)||['personal','Personal details','profile'];
+  const contact=state.me.prefs?.contact||{};
   let panel;
-  if(current[0]==='orders') panel=orderPanel(await api('orders'),statuses.includes(filter)?filter:'all');
-  else if(current[0]==='notifications') panel='<section id="notices">'+notificationList(await api('notifications'))+'</section>';
-  else if(current[0]==='addresses') panel=addressPanel();
-  else if(current[0]==='favorites') panel=savedFlowers();
-  else panel=personalPanel();
-  const links=sections.map(([key,title,glyph])=>'<a '+(key===current[0]?'aria-current="page" ':'')+'href="#account/'+key+'">'+icon(glyph)+label(title)+'</a>').join('');
-  return '<div class="profile-dashboard"><aside class="profile-menu"><div class="customer-id">'+icon('profile')+'<strong>'+esc(state.me.name)+'</strong></div>'+
-    '<nav aria-label="'+label('Account')+'">'+links+'</nav><button data-logout>'+label('Log out')+'</button></aside>'+
-    '<section class="profile-content"><h2>'+label(current[1])+'</h2>'+panel+'</section></div>';
+  switch(current[0]) {
+    case 'orders': panel=panelHeading('My orders')+orderPanel(await api('orders'),statuses.includes(mode)?mode:'all');break;
+    case 'notifications': panel=panelHeading(current[1])+'<section class="account-block" id="notices">'+notificationList(await api('notifications'))+'</section>';break;
+    case 'addresses': panel=addressPanel(mode);break;
+    case 'favorites': panel=panelHeading(current[1])+'<div class="account-block">'+savedFlowers()+'</div>';break;
+    case 'wallet': panel=panelHeading(current[1])+'<div class="account-block wallet-info">'+icon('wallet')+'<p>'+label('Wallet status')+'</p></div>';break;
+    default: panel=personalPanel(mode);
+  }
+  const links=sections.map(([key,title,glyph])=>'<a '+(key===current[0]?'aria-current="page" ':'')+'href="#account/'+key+'">'+icon(glyph)+'<span>'+label(title)+'</span>'+icon('chevron')+'</a>').join('');
+  return '<div class="profile-dashboard"><aside class="profile-menu"><a class="customer-id" href="#account/personal" '+(current[0]==='personal'?'aria-current="page"':'')+'>'+
+    '<strong>'+esc([state.me.name,contact.family].filter(Boolean).join(' '))+'</strong>'+icon('chevron')+'</a>'+
+    '<div class="identity-line"><bdi>'+esc(contact.phone||state.me.email)+'</bdi><span>'+label('Customer account')+'</span></div>'+
+    '<nav aria-label="'+label('Account')+'">'+links+'</nav><button class="account-exit" data-logout>'+icon('logout')+label('Log out')+'</button></aside>'+
+    '<section class="profile-content">'+panel+'</section></div>';
 }
 export function invoice(o) {
   return '<div class="invoice"><h2>'+label('Invoice')+' · SimaGol</h2><p><bdi>'+esc(o.id)+'</bdi> · '+label(o.status)+'</p><p>'+esc(o.recipient)+' · '+esc(o.address)+'</p>'+

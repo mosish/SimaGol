@@ -116,7 +116,27 @@ export function profile(db, id, body) {
     if ('name' in body) account.name = trimmed(body.name, 120, 'Invalid name');
     if ('addresses' in body) {
       if (!Array.isArray(body.addresses) || body.addresses.length > 20) fail(400, 'Invalid addresses');
-      account.addresses = body.addresses.map((address) => trimmed(address, 500, 'Invalid addresses'));
+      account.addresses = body.addresses.map(address => {
+        if (typeof address === 'string') return trimmed(address, 500, 'Invalid addresses');
+        if (!address || typeof address !== 'object' || Array.isArray(address)) fail(400,'Invalid addresses');
+        const entry={address:trimmed(address.address,500,'Invalid addresses')};
+        for (const [key,limit] of Object.entries({title:80,city:80,recipient:120,phone:32,postal:20})) {
+          if (address[key]) entry[key]=trimmed(address[key],limit,'Invalid addresses');
+        }
+        return entry;
+      });
+    }
+    if ('contact' in body) {
+      const contact=body.contact;
+      if (!contact || typeof contact!=='object' || Array.isArray(contact)) fail(400,'Invalid profile');
+      const saved={...account.prefs.contact};
+      for (const [key,limit] of Object.entries({family:120,phone:32,city:80,birthday:10,referral:40})) {
+        if (!(key in contact)) continue;
+        saved[key]=contact[key]===''?'':trimmed(contact[key],limit,'Invalid profile');
+      }
+      if (saved.birthday && (!/^\d{4}-\d{2}-\d{2}$/.test(saved.birthday) || !Number.isFinite(Date.parse(saved.birthday)) ||
+          new Date(saved.birthday).toISOString().slice(0,10)!==saved.birthday)) fail(400,'Invalid profile');
+      account.prefs.contact=saved;
     }
     if ('prefs' in body) {
       const prefs = body.prefs;

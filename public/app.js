@@ -4,7 +4,7 @@ import { setupInstall } from './components/install.js';
 import { renderGreeting } from './components/greeting.js';
 import { renderNavigation } from './components/navigation.js';
 import { collection, product, bagView } from './components/store.js';
-import { account, checkout, checkoutFields, invoice, orderList, notificationList } from './components/account.js';
+import { account, checkout, checkoutFields, invoice, orderList, notificationList, addressDetails, deliveryText } from './components/account.js';
 import { showHomepage } from './components/home.js';
 import { admin } from './components/admin.js';
 
@@ -154,6 +154,12 @@ async function act(b) {
     if($('#notices')) $('#notices').innerHTML=notificationList(notices);
     return;
   }
+  if (b.hasAttribute('data-default-address')) {
+    const rows=[...state.me.addresses], index=Number(b.dataset.defaultAddress);
+    if(index<1||index>=rows.length)return;
+    rows.unshift(rows.splice(index,1)[0]);
+    await api('profile','POST',{addresses:rows});await refresh();await route();return;
+  }
   if (b.hasAttribute('data-delete-address')) {
     if (!confirm(t('Delete address?'))) return;
     const addresses=state.me.addresses.filter((_,i)=>i!==Number(b.dataset.deleteAddress));
@@ -191,7 +197,12 @@ document.addEventListener('change',e=>{
   const f=e.target.closest('form');
   if(!f)return;
   if(f.dataset.form==='checkout'){
-    if(e.target.name==='saved'&&e.target.value!=='')f.elements.address.value=state.me.addresses[Number(e.target.value)];
+    if(e.target.name==='saved'){
+      const a=addressDetails(e.target.value===''?'':state.me.addresses[Number(e.target.value)]);
+      f.elements.address.value=deliveryText(a);
+      f.elements.phone.value=a.phone||state.me.prefs?.contact?.phone||'';
+      f.elements.recipient.value=a.recipient||state.me.name;
+    }
     checkoutFields(f);
   }
   if(f.dataset.form==='copy'&&e.target.name==='key'){
@@ -216,14 +227,19 @@ async function submit(form) {
     await api(k.toLowerCase(),'POST',data);
     await refresh();if(location.hash!==returnTo)location.hash=returnTo;
   } else if(k==='profile'){
-    await api('profile','POST',{name:data.name});
+    const {name,...contact}=data;
+    await api('profile','POST',{name,contact});location.hash='account/personal';
+    await refresh();
+  } else if(k==='referral'){
+    await api('profile','POST',{contact:{referral:data.referral}});
     await refresh();
   } else if(k==='address'){
     const addresses=[...state.me.addresses];
     const index=Number(data.index);
-    if(index===-1) addresses.push(data.address.trim());
-    else addresses[index]=data.address.trim();
-    await api('profile','POST',{addresses});
+    delete data.index;
+    if(index===-1) addresses.push(data);
+    else addresses[index]=data;
+    await api('profile','POST',{addresses});location.hash='account/addresses';
     await refresh();
   } else if(k==='checkout'){
     if(!form.reportValidity())return;
@@ -292,5 +308,5 @@ async function boot() {
   }
 }
 window.addEventListener('online',boot);
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/planner/sw.js',{scope:'/'}).catch(()=>{});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/planner/sw.js',{scope:'/',updateViaCache:'none'}).catch(()=>{});
 boot();
