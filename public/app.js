@@ -5,7 +5,7 @@ import { icon } from './components/icons.js';
 import { setupInstall } from './components/install.js';
 import { renderGreeting } from './components/greeting.js';
 import { renderNavigation } from './components/navigation.js';
-import { collection, product, bagView } from './components/store.js';
+import { collection, drawFilters, favoritesFilter, product, bagView } from './components/store.js';
 import { account, checkout, checkoutFields, invoice, orderList, notificationList, addressDetails, deliveryText } from './components/account.js';
 import { showHomepage } from './components/home.js';
 import {readDate} from './components/calendar.js';
@@ -42,6 +42,7 @@ function appearance() {
   $('.seal').hidden=!logo.hidden;
   if(!logo.hidden) logo.src='/'+state.settings.logo;
   showHomepage();
+  drawFilters();
   collection();
 }
 function closeView() {
@@ -79,6 +80,11 @@ async function route() {
     $('#home-view').hidden=false;
   }
   if(['','#','#catalog','#favorites'].includes(h)){
+    if(h==='#favorites'){
+      state.category=favoritesFilter;
+      history.replaceState(null,'','#catalog');
+      drawFilters();
+    }
     if(modal.open)modal.close();
     collection();
     return;
@@ -145,7 +151,11 @@ const drawControls=appearanceControls(async prefs=>{
   state.lang=prefs.lang;appearance();await route();
   if(state.me)try{await api('profile','POST',{prefs});}catch(e){notify(t(e.message));}
 });
-$('#favorites').onclick=()=>{state.category='all';$('#search').value='';location.hash=location.hash==='#favorites'?'catalog':'favorites';$('#catalog').scrollIntoView();collection();};
+$('#filters').onchange=e=>{
+  state.category=e.target.value;
+  drawFilters();
+  collection();
+};
 setupInstall($('#install-app'),(fa,en)=>notify(state.lang==='fa'?fa:en));
 $('.close').onclick=closeView;
 modal.oncancel=e=>{e.preventDefault();closeView();};
@@ -171,14 +181,14 @@ async function act(b) {
     const addresses=state.me.addresses.filter((_,i)=>i!==Number(b.dataset.deleteAddress));
     await api('profile','POST',{addresses});await refresh();await route();return;
   }
-  if(b.dataset.filter){state.category=b.dataset.filter;collection();return;}
   if(b.dataset.fav){
     const id=b.dataset.fav;
     const favorites=state.favorites.includes(id)?state.favorites.filter(x=>x!==id):[...state.favorites,id];
     if(state.me)await api('profile','POST',{prefs:{favorites}});
     else persist('favorites',favorites);
     state.favorites=favorites;collection();
-    document.querySelector('[data-fav="'+CSS.escape(id)+'"]')?.focus();return;
+    const next=document.querySelector('[data-fav="'+CSS.escape(id)+'"]')||$('#filters input:checked');
+    next?.focus({preventScroll:true});return;
   }
   if(b.dataset.add||b.dataset.sub){
     changeBag(b.dataset.add||b.dataset.sub,b.dataset.add?1:-1);appearance();

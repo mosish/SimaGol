@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { beforeEach, test } from 'node:test';
 import { state, changeBag, price, t } from '../public/components/ui.js';
-import { collection, product, bagView } from '../public/components/store.js';
+import { collection, favoritesFilter, product, bagView } from '../public/components/store.js';
 import { checkout, checkoutFields, invoice, account } from '../public/components/account.js';
 import { admin } from '../public/components/admin.js';
 
@@ -31,7 +31,10 @@ test('FA/EN names, category filters, scoped favorite search and product detail',
   collection();
   assert(nodes.get('#products').innerHTML.includes(p.name.fa));
   assert(product(p).includes(p.description.fa));
-  state.lang='en'; state.category=p.category; state.favorites=[p.id]; location.hash='#favorites';
+  state.lang='en'; state.category=favoritesFilter; state.favorites=[p.id];
+  collection();
+  assert.equal((nodes.get('#products').innerHTML.match(/class="product"/g)||[]).length,1);
+  assert.equal(nodes.get('.section-title h2').textContent,t('New arrivals'));
   document.querySelector('#search').value=p.name.en;
   collection();
   assert(nodes.get('#products').innerHTML.includes(p.name.en));

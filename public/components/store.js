@@ -1,17 +1,31 @@
 import { $,state,t,label,esc,num,price,mascot,selectedItems } from './ui.js';
 import { icon } from './icons.js';
 const normalize = s => s.toLowerCase().replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[\s\u200c]+/g,' ').trim();
+export const favoritesFilter = '@favorites';
+let previousOptions;
+export function drawFilters() {
+  const host = $('#filters');
+  const options = [['all',t('All flowers')], ...state.catalog.categories.map(c=>[c.id,c.name[state.lang]]), [favoritesFilter,t('favorites')]];
+  const key = JSON.stringify(options);
+  if (previousOptions !== key) {
+    host.innerHTML = options.map(([id,name]) => '<label class="filter-choice"><input type="radio" name="catalog-filter" value="'+esc(id)+'"><span>'+esc(name)+'</span></label>').join('');
+    host.style.setProperty('--segments',options.length);
+    previousOptions = key;
+  }
+  const index = options.findIndex(([id])=>id===state.category);
+  if (index<0) state.category='all';
+  const selected=Math.max(index,0);
+  host.querySelectorAll('input')[selected].checked=true;
+  host.setAttribute('aria-label',t('Filter flowers'));
+  host.style.setProperty('--shift',(state.lang==='fa'?-1:1)*selected*100+'%');
+}
 export function collection() {
-  const fav = location.hash === '#favorites';
+  const fav = state.category === favoritesFilter;
   const q = normalize($('#search').value);
   const cats = state.catalog.categories;
-  $('#filters').innerHTML = [['all',t('All flowers')], ...cats.map(c => [c.id,c.name[state.lang]])]
-    .map(([id,name]) => '<button class="chip '+(state.category===id?'active':'')+'" data-filter="'+esc(id)+'" aria-pressed="'+(id===state.category)+'">'+esc(name)+'</button>').join('');
-  $('.section-title h2').textContent = t(fav?'Favorites':'New arrivals');
-  const rows = state.catalog.products.filter(p => (!fav || state.favorites.includes(p.id)) &&
-    (state.category==='all' || state.category===p.category) && normalize(p.name[state.lang]+' '+p.description[state.lang]).includes(q));
-  // The catalog API returns products in insertion order.
-  if (!fav) rows.reverse();
+  $('.section-title h2').textContent = t('New arrivals');
+  const rows = state.catalog.products.filter(p => (fav ? state.favorites.includes(p.id) : state.category==='all' || state.category===p.category)
+    && normalize(p.name[state.lang]+' '+p.description[state.lang]).includes(q)).reverse();
   $('#results').textContent = num(rows.length)+' '+t('products');
   $('#products').innerHTML = rows.map(p => {
     const id=esc(p.id), name=esc(p.name[state.lang]), saved=state.favorites.includes(p.id);
@@ -20,7 +34,7 @@ export function collection() {
       '<button class="heart '+(saved?'on':'')+'" data-fav="'+id+'" aria-label="'+label('Favorites')+' · '+name+'" aria-pressed="'+saved+'">'+icon('heart')+'</button>'+
       '<div class="card-content"><span class="category">'+esc(category?.name[state.lang])+'</span><h3><a href="#product/'+id+'">'+name+'</a></h3>'+
       '<div class="card-info"><span class="price">'+esc(price(p.priceIrr))+'</span><button class="plus" '+(!p.stock?'disabled':'')+' aria-label="'+label('Add to bag')+' · '+name+'" data-add="'+id+'">'+icon('plus')+'</button></div></div></article>';
-  }).join('') || '<div class="empty">'+mascot('empty')+label('No flowers found')+'</div>';
+  }).join('') || '<div class="empty">'+mascot('empty')+label(fav&&!state.favorites.length?'No saved flowers':'No flowers found')+'</div>';
 }
 export function product(p) {
   return '<img class="detail-photo" src="/'+esc(p.image)+'" alt=""><h2>'+esc(p.name[state.lang])+'</h2><p>'+esc(p.description[state.lang])+

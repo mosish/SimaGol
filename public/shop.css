@@ -334,9 +334,77 @@ html[lang=en] .hero em {
   border-color:var(--accent);
 }
 
-#filters {
-  gap:8px;
-  flex-wrap:wrap;
+.filter-scroll {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+#filters, #language {
+  --segments: 2;
+  --shift: 0%;
+  --inset: 3px;
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: stretch;
+  width: max-content;
+  padding: var(--inset);
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: inset 0 1px 3px color-mix(in srgb,var(--text) 12%,transparent);
+}
+#filters::before, #language::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-block: var(--inset);
+  inset-inline-start: var(--inset);
+  width: calc((100% - 2 * var(--inset)) / var(--segments));
+  border-radius: inherit;
+  background: linear-gradient(150deg,color-mix(in srgb,var(--accent) 92%,white),var(--accent));
+  box-shadow: inset 0 1px 1px #ffffff42, 0 1px 4px #27142933;
+  transform: translateX(var(--shift));
+}
+#language:has([value=en]:checked) { --shift: 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  #filters::before, #language::before { transition: transform .56s cubic-bezier(.33,.06,.2,1); }
+}
+.filter-choice {
+  position: relative;
+  display: grid;
+  cursor: pointer;
+}
+.filter-choice input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.filter-choice span {
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  padding-inline: clamp(7px,1.2vw,16px);
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: .84rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+.filter-choice input:checked + span, #language input:checked + span { color: white; }
+.filter-choice input:focus-visible + span, #language input:focus-visible + span {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+@media (forced-colors: active) {
+  .filter-choice input:checked + span, #language input:checked + span { outline: 2px solid Highlight; outline-offset: -2px; }
 }
 
 #results,.category {
@@ -1241,15 +1309,9 @@ html[dir=ltr] .profile-menu a svg:last-child {transform:rotate(180deg);}
   pointer-events: none;
 }
 .preference-choice svg { width: 17px; height: 17px; }
-.preference-choice input:checked + span {
-  color: var(--plum);
-  background: var(--hero);
-  border-color: var(--plum);
-  box-shadow: var(--shadow);
-}
-.preference-choice input:focus-visible + span { outline: 2px solid var(--text); outline-offset: 1px; }
 @media (hover: hover) {
-  .preference-choice:hover span { background: var(--hero); color: var(--text); }
+  .preference-choice:hover input:not(:checked) + span,
+  .filter-choice:hover input:not(:checked) + span { color: var(--text); }
 }
 @media (pointer: coarse) {
   .preference-choice span { min-block-size: 40px; min-inline-size: 36px; }
