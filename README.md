@@ -2,6 +2,10 @@
 
 SimaGol is a bilingual flower shop for customers who want to choose an arrangement, send it to a recipient and follow its delivery. Persian opens right-to-left by default. The visible FA/EN and theme controls switch the entire interface. The clay-style surfaces work in both light and dark modes.
 
+## Occasion planner PWA
+
+Open [/planner/](http://localhost:3000/planner/) for the Persian/English installable occasion calendar. Personal dates, gift notes and the reminder inbox persist on the device. Regional observances support automatic three-day and one-day flower reminders. See the [planner setup and mobile testing checklist](docs/planner.md), [regional rules](docs/occasions.md) and [background push setup](docs/planner-push.md).
+
 ## Try the shop on Windows
 
 Install Node.js **24.13 or newer** with built-in SQLite and npm. Open PowerShell in this folder:

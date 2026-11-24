@@ -1,68 +1,103 @@
 SimaGol/
-├── .dockerignore
-├── .editorconfig
-├── .env
-├── .env.example
-├── .git/
-├── .gitattributes
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-├── .gitignore
-├── .prettierrc.json
-├── CREDITS.md
-├── Dockerfile
-├── LICENSE
-├── README.md
-├── compose.yaml
-├── data/
-│   └── shop.sqlite
-├── docs/
-│   ├── api.md
-│   ├── deployment.md
-│   ├── design.md
-│   ├── github.md
-│   ├── tree.txt
-│   └── verification.md
-├── eslint.config.mjs
-├── package-lock.json
-├── package.json
-├── public/
-│   ├── app.js
-│   ├── components/
-│   │   ├── account.js
-│   │   ├── admin.js
-│   │   ├── home.js
-│   │   ├── icons.js
-│   │   ├── store.js
-│   │   └── ui.js
-│   ├── images/
-│   │   ├── hero.jpg
-│   │   ├── lilies.jpg
-│   │   ├── meadow.jpg
-│   │   ├── roses.jpg
-│   │   └── tulips.jpg
-│   ├── index.html
-│   ├── labels.json
-│   └── shop.css
-├── scripts/
-│   ├── admin.js
-│   ├── lint.js
-│   └── setup.js
-├── server/
-│   ├── auth.js
-│   ├── catalog.json
-│   ├── commerce.js
-│   ├── db.js
-│   ├── http.js
-│   ├── notifications.js
-│   ├── schema.sql
-│   └── start.js
-└── tests/
-    ├── auth.test.js
-    ├── browser.smoke.mjs
-    ├── commerce.test.js
-    ├── http.test.js
-    ├── notifications.test.js
-    ├── release.test.js
-    └── storefront.test.js
+  .dockerignore
+  .editorconfig
+  .env.example
+  .gitattributes
+  .github/workflows/ci.yml
+  .gitignore
+  .prettierrc.json
+  CREDITS.md
+  Dockerfile
+  LICENSE
+  README.md
+  compose.yaml
+  docs/api.md
+  docs/deployment.md
+  docs/design.md
+  docs/github.md
+  docs/occasions.md
+  docs/planner-push.md
+  docs/planner.md
+  docs/tree.txt
+  docs/verification.md
+  eslint.config.mjs
+  package-lock.json
+  package.json
+  public/app.js
+  public/components/account.js
+  public/components/admin.js
+  public/components/home.js
+  public/components/icons.js
+  public/components/store.js
+  public/components/ui.js
+  public/images/hero.jpg
+  public/images/lilies.jpg
+  public/images/meadow.jpg
+  public/images/roses.jpg
+  public/images/tulips.jpg
+  public/index.html
+  public/labels.json
+  public/planner/app.js
+  public/planner/dates.js
+  public/planner/device.js
+  public/planner/images/apple-touch.png
+  public/planner/images/icon-192.png
+  public/planner/images/icon-512.png
+  public/planner/images/launch-1125x2436.png
+  public/planner/images/launch-1170x2532.png
+  public/planner/images/launch-1179x2556.png
+  public/planner/images/launch-1206x2622.png
+  public/planner/images/launch-1242x2688.png
+  public/planner/images/launch-1284x2778.png
+  public/planner/images/launch-1290x2796.png
+  public/planner/images/launch-1320x2868.png
+  public/planner/images/launch-1334x750.png
+  public/planner/images/launch-1536x2048.png
+  public/planner/images/launch-1640x2360.png
+  public/planner/images/launch-1792x828.png
+  public/planner/images/launch-2048x1536.png
+  public/planner/images/launch-2360x1640.png
+  public/planner/images/launch-2436x1125.png
+  public/planner/images/launch-2532x1170.png
+  public/planner/images/launch-2556x1179.png
+  public/planner/images/launch-2622x1206.png
+  public/planner/images/launch-2688x1242.png
+  public/planner/images/launch-2778x1284.png
+  public/planner/images/launch-2796x1290.png
+  public/planner/images/launch-2868x1320.png
+  public/planner/images/launch-750x1334.png
+  public/planner/images/launch-828x1792.png
+  public/planner/index.html
+  public/planner/manifest.json
+  public/planner/planner.css
+  public/planner/store.js
+  public/planner/sw.js
+  public/shop.css
+  scripts/admin.js
+  scripts/build.js
+  scripts/lint.js
+  scripts/push-keys.js
+  scripts/setup.js
+  server/auth.js
+  server/catalog.json
+  server/commerce.js
+  server/db.js
+  server/http.js
+  server/notifications.js
+  server/push.js
+  server/schema.sql
+  server/start.js
+  tests/auth.test.js
+  tests/browser.smoke.mjs
+  tests/commerce.test.js
+  tests/dates.test.js
+  tests/http.test.js
+  tests/notifications.test.js
+  tests/planner-store.test.js
+  tests/planner.smoke.mjs
+  tests/push.test.js
+  tests/pwa.test.js
+  tests/release.test.js
+  tests/storefront.test.js
+
+Local only: .env, data/, build/, .git/

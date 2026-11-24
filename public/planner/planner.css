@@ -1,0 +1,48 @@
+.planner-intro {
+  display: grid; grid-template-columns: 1fr minmax(170px, 29%); overflow: hidden;
+  margin-block: 2rem; background: var(--hero); border-radius: 28px;
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.planner-intro > div { padding: clamp(1.25rem, 4vw, 3rem); }
+.planner-intro h1 { margin: 0; color: var(--text); font: 700 clamp(2rem, 4.5vw, 4rem)/1.35 var(--serif); }
+.planner-intro p { max-width: 58ch; color: var(--muted); }
+.planner-intro img { width: 100%; height: 100%; max-height: 19rem; object-fit: cover; }
+.planner-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(230px, 1fr); gap: 1.25rem; align-items: start; }
+.sheet { padding: clamp(1rem, 2vw, 2rem); border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface); border-radius: 22px; margin-block-end: 1.25rem; }
+.sheet h2, .sheet h3, dialog h2 { font-family: var(--serif); margin-block: 0 .75rem; }
+.section-top, .actions, .month-actions, .row-actions { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+.section-top { justify-content: space-between; margin-block-end: .8rem; }
+.section-top h2 { margin: 0; }
+.region-label, #prefs label { display: grid; gap: .25rem; color: var(--muted); font-size: .91rem; }
+.region-label { width: fit-content; margin-block: .75rem; }
+select, #prefs input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--muted); border-radius: 10px; padding: .45rem .65rem; }
+.minor, .month-actions button, .row-actions button, .row-actions a {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px;
+  padding: .35rem .8rem; border-radius: 12px; border: 1px solid var(--line); background: var(--hero); color: var(--text); font-size: .91rem;
+}
+.weekdays, .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .3rem; }
+.weekdays { text-align: center; color: var(--muted); margin-block: 1rem .4rem; font-size: .86rem; }
+.days button { position: relative; display: grid; place-content: center; min-height: clamp(41px, 4vw, 60px); border: 1px solid var(--line); border-radius: 12px; background: var(--bg); line-height: 1.15; padding: .25rem; }
+.days button[aria-pressed="true"] { color: white; background: var(--accent); border-color: var(--accent); }
+.days button[aria-current="date"] { text-decoration: underline; text-underline-offset: 3px; }
+.days button.has-events::after { content: ''; position: absolute; bottom: 4px; inset-inline-start: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.calendar h3 { margin-block: 1.5rem .5rem; }
+.event-row { padding-block: .75rem; border-block-start: 1px solid var(--line); overflow-wrap: anywhere; }
+.event-row h4, .event-row p { margin: 0; }
+.event-row .row-actions { margin-block-start: .4rem; }
+.hint, .meta { color: var(--muted); font-size: .92rem; }
+.preferences { margin-block-end: 2rem; }
+#prefs { display: flex; align-items: end; flex-wrap: wrap; gap: .75rem; }
+#prefs label, #prefs input { min-width: 0; max-width: 100%; }
+#status:not(:empty), #form-error:not(:empty) { padding: .8rem; background: var(--hero); border-radius: 10px; }
+#unread:not(:empty) { border-radius: 20px; background: var(--hero); padding: .15rem .65rem; }
+#editor { width: min(520px, 95vw); }
+#inbox, #entries { max-height: 33rem; overflow: auto; }
+@media (max-width: 760px) {
+  .planner-layout { grid-template-columns: 1fr; gap: 0; }
+  .planner-intro { grid-template-columns: minmax(0, 1fr) 29%; margin-block: 1.2rem; }
+  .weekdays { font-size: .76rem; }
+  .planner-intro h1 { font-size: clamp(1.5rem, 6vw, 2.5rem); }
+  .days { gap: .16rem; }
+  .days button { min-height: 40px; border-radius: 8px; }
+}

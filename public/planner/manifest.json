@@ -1,0 +1,17 @@
+{
+  "id": "/planner/",
+  "name": "سیماگل | SimaGol Flower Planner",
+  "short_name": "SimaGol",
+  "description": "A bilingual occasion calendar with flower-order reminders.",
+  "lang": "fa",
+  "dir": "rtl",
+  "scope": "/planner/",
+  "start_url": "/planner/",
+  "display": "standalone",
+  "background_color": "#faf7f9",
+  "theme_color": "#f8f4f7",
+  "icons": [
+    { "src": "./images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

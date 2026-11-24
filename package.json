@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=24.13.0" },
+  "engines": {
+    "node": ">=24.13.0"
+  },
   "scripts": {
     "start": "node --env-file-if-exists=.env server/start.js",
     "db:setup": "node --env-file-if-exists=.env scripts/setup.js",
     "admin": "node --env-file-if-exists=.env scripts/admin.js",
     "lint": "node scripts/lint.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/build.js"
   }
 }

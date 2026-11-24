@@ -11,6 +11,7 @@ jobs:
         with:
           node-version: '24'
       - run: npm ci --ignore-scripts
+      - run: npm run build
       - run: npm run lint
       - run: node --experimental-test-coverage --test tests/*.test.js
       - name: Install isolated CI tools
@@ -18,6 +19,7 @@ jobs:
       - run: npx --no-install eslint .
       - run: npx --no-install playwright install --with-deps chromium
       - run: node tests/browser.smoke.mjs
+      - run: node tests/planner.smoke.mjs
       - run: docker build -t simagol-ci .
       - name: Start release container and verify health
         run: |

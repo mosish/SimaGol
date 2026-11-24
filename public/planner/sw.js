@@ -1,0 +1,57 @@
+// Bump this version when changing an asset in a source deployment.
+const cacheName = 'simagol-planner-v1';
+const shell = '/planner/';
+const assets = [
+  shell, '/planner/index.html', '/planner/manifest.json', '/planner/planner.css',
+  '/planner/app.js', '/planner/store.js', '/planner/dates.js', '/planner/device.js',
+  '/planner/images/icon-192.png', '/planner/images/icon-512.png', '/planner/images/apple-touch.png',
+  '/shop.css', '/images/meadow.jpg',
+];
+const cachedPaths = new Set(assets);
+
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(cacheName).then(cache =>
+    cache.addAll(assets.map(path => new Request(path, {cache:'reload'})))
+  ));
+});
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    for (const name of await caches.keys()) {
+      if (name.startsWith('simagol-planner-') && name !== cacheName) await caches.delete(name);
+    }
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin || !cachedPaths.has(url.pathname)) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(cacheName);
+    const cached = await cache.match(url.pathname);
+    return cached || fetch(event.request);
+  })());
+});
+self.addEventListener('push', event => {
+  event.waitUntil((async () => {
+    const fa = (self.navigator.language || 'fa').startsWith('fa');
+    await self.registration.showNotification(fa ? 'یادآور گل سیماگل' : 'SimaGol flower reminder', {
+      body: fa ? 'برای دیدن مناسبت و سفارش گل، تقویم را باز کن.' : 'Open your calendar to see the occasion and plan your flowers.',
+      icon: '/planner/images/icon-192.png', tag: 'simagol-flowers', renotify: true,
+    });
+    for (const tab of await self.clients.matchAll({type:'window'})) tab.postMessage('planner-reminder');
+  })());
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    for (const tab of await self.clients.matchAll({type:'window',includeUncontrolled:true})) {
+      const url = new URL(tab.url);
+      if (url.origin === self.location.origin && url.pathname.startsWith(shell)) {
+        await tab.focus();
+        tab.postMessage('planner-reminder');
+        return;
+      }
+    }
+    await self.clients.openWindow(shell);
+  })());
+});

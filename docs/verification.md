@@ -12,3 +12,7 @@ ECC's test-first workflow, security review and verification loop were applied to
 | Browser and container | CI jobs supplied. Local listener creation returned EACCES, and Docker Desktop's Linux engine was unavailable. A deployed site, production TLS, manual WCAG acceptance and real fulfilment remain unverified. |
 
 Use the commands in the README and deployment runbook to repeat these checks. Node's coverage report describes modules loaded by its tests. Browser startup, assistive technology, real network behavior, and the deployment environment need separate checks.
+
+## Occasion planner release
+
+35 automated tests passed for the combined shop and planner. The PWA suite covers manifest icons, offline cache contents, storage failure, reminder recurrence across DST and civil years, regional dates, authenticated schedule ownership, real VAPID signatures, retry and endpoint expiry. Build, lint and Compose configuration checks passed. Live APNs/FCM delivery, physical-device install and the CI mobile Chromium walkthrough remain unverified locally.

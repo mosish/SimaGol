@@ -5,6 +5,7 @@ import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { catalog, settings } from './db.js';
 import { notifications, markNotificationsRead } from './notifications.js';
+import { initPush, syncPush, deletePush } from './push.js';
 import { placeOrder, transition, order, orders, saveAdmin } from './commerce.js';
 import { register, login, getUser, newSession, logout, profile, setRole } from './auth.js';
 
@@ -41,7 +42,8 @@ async function media(dir, data) {
   return {path:'uploads/'+name};
 }
 
-export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy}) {
+export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy,pushCredentials=null}) {
+  initPush(db);
   const attempts=new Map();
   function throttle(ip) {
     const now=Date.now();
@@ -70,11 +72,13 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
       const method=req.method;
       if(!path.startsWith('/api/')) {
         if(!['GET','HEAD'].includes(method)) fail(405,'Method unavailable');
-        const unknownPage=path!=='/' && path!=='/index.html' && req.headers.accept?.includes('text/html') &&
+        if(path==='/planner'){res.statusCode=308;res.setHeader('Location','/planner/');res.end();return;}
+        const plannerFile=/^\/planner\/(?:|index\.html|manifest\.json|(?:app|dates|store|device|sw)\.js|planner\.css|images\/(?:icon-(?:192|512)|apple-touch|launch-[0-9]+x[0-9]+)\.png)$/.test(path);
+        const unknownPage=!plannerFile && path!=='/' && path!=='/index.html' && req.headers.accept?.includes('text/html') &&
           !/^\/(?:images|uploads|components)\//.test(path);
-        const filename=path==='/'||unknownPage?'index.html':path.slice(1);
+        const filename=path==='/'||unknownPage?'index.html':path==='/planner/'?'planner/index.html':path.slice(1);
         if(unknownPage)res.statusCode=404;
-        if(!/^(index\.html|shop\.css|app\.js|labels\.json|components\/[a-z]+\.js|images\/[a-z]+\.jpg|uploads\/[a-f0-9]{64}\.(png|jpg|webp))$/.test(filename)) fail(404,'Page not found');
+        if(!plannerFile && !/^(index\.html|shop\.css|app\.js|labels\.json|components\/[a-z]+\.js|images\/[a-z]+\.jpg|uploads\/[a-f0-9]{64}\.(png|jpg|webp))$/.test(filename)) fail(404,'Page not found');
         const bytes=await readFile(join(filename.startsWith('uploads/')?dir:publicDir,filename)).catch(()=>fail(404,'Page not found'));
         res.setHeader('Content-Type',types[extname(filename)]);
         res.end(method==='HEAD'?undefined:bytes);
@@ -88,6 +92,7 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
         if(roles&&!roles.includes(user.role)) fail(403,'Access denied');
       };
       if(method==='GET') {
+        if(key==='push/config') return send({enabled:!!pushCredentials,publicKey:pushCredentials?.publicKey||null});
         if(key==='health') {db.prepare('SELECT 1').get();return send({ok:true});}
         if(key==='store') return send({catalog:catalog(db),settings:{...settings(db),ordersEnabled}});
         if(key==='me') return send(user);
@@ -129,6 +134,11 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
       }
       if(key==='logout') {logout(db,token);cookie('',0);return send({ok:true});}
       permit();
+      if(key==='push/delete') return send(deletePush(db,user.id,b));
+      if(key==='push/sync') {
+        if(!pushCredentials) fail(503,'Background reminders unavailable');
+        return send(syncPush(db,user.id,b));
+      }
       if(key==='profile') return send(profile(db,user.id,b));
       if(key==='notifications/read') return send(markNotificationsRead(db,user.id,b.through));
       if(key==='orders') {

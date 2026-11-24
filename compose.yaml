@@ -16,6 +16,7 @@ services:
       DATA_DIR: /app/data
       APP_ORIGIN: ${APP_ORIGIN:?Set the public HTTPS origin in .env}
       ORDERS_ENABLED: ${ORDERS_ENABLED:-false}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
     volumes:
       - flower-data:/app/data
     ports:
