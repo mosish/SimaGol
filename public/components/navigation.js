@@ -3,6 +3,7 @@ import {icon} from './icons.js';
 const tabs = [
   ['home', '/', 'خانه', 'Home'],
   ['bouquet', '/#bouquet', 'ساخت دسته‌گل', 'Bouquet studio'],
+  ['plus', '/planner/#new', 'ایجاد یادآوری', 'Create reminder'],
   ['bell', '/planner/', 'یادآوری', 'Reminders'],
   ['profile', '/#account', 'پروفایل', 'Profile'],
 ];
@@ -20,11 +21,12 @@ export function renderNavigation(active, lang, quantity = 0) {
       link = document.createElement('a');
       link.dataset.tab = key;
       link.href = href;
+      if(key==='plus')link.className='create-reminder';
       link.innerHTML = icon(key) + '<span></span>';
       bar.append(link);
     }
     link.lastElementChild.textContent = fa ? persian : english;
-    // Only the four primary destinations participate in tab selection.
+    if(key==='plus')link.title=link.lastElementChild.textContent;
     if (active === key) link.setAttribute('aria-current','page');
     else link.removeAttribute('aria-current');
   }

@@ -1,3 +1,4 @@
+import {appearanceControls,accountTheme} from './components/appearance.js';
 import { $, state, t, label, persist, api, mascot, changeBag, selectedItems, stored } from './components/ui.js';
 import { icon } from './components/icons.js';
 import { setupInstall } from './components/install.js';
@@ -27,14 +28,9 @@ function appearance() {
   document.documentElement.lang=state.lang;
   document.documentElement.dir=state.lang==='fa'?'rtl':'ltr';
   renderGreeting($('.brand small'), state.me?.name, state.lang, t('Customer greeting'));
-  document.documentElement.classList.toggle('dark',state.dark);
+  drawControls(state.lang);
   document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
   document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
-  $('#language').textContent=state.lang==='fa'?'EN':'FA';
-  $('#language').ariaLabel=state.lang==='fa'?'English':'فارسی';
-  $('#theme').ariaLabel=t('Switch theme');
-  $('#theme').setAttribute('aria-pressed',String(state.dark));
-  $('#theme').innerHTML=icon(state.dark?'sun':'moon');
   $('.close').ariaLabel=t('Close');
   $('#search').ariaLabel=t('Search');$('#search').placeholder=t('Search');
   $('#hero-mascot').innerHTML=mascot('hero');
@@ -130,17 +126,14 @@ async function refresh() {
   state.favorites=me ? (me.prefs?.favorites || []) : stored('favorites',[]);
   if(!Array.isArray(state.favorites))state.favorites=[];
   if(me?.prefs?.lang)state.lang=me.prefs.lang;
-  if(typeof me?.prefs?.dark==='boolean')state.dark=me.prefs.dark;
+  accountTheme(me?.prefs);
   ready=true;appearance();
 }
-async function preference() {
-  persist('lang',state.lang);persist('dark',state.dark);
-  appearance();await route();
-  if(state.me) await api('profile','POST',{prefs:{lang:state.lang,dark:state.dark}});
-}
-$('#language').onclick=()=>{state.lang=state.lang==='fa'?'en':'fa';preference().catch(e=>notify(t(e.message)));};
+const drawControls=appearanceControls(async prefs=>{
+  state.lang=prefs.lang;appearance();await route();
+  if(state.me)try{await api('profile','POST',{prefs});}catch(e){notify(t(e.message));}
+});
 $('#calendar').onclick=()=>{localStorage.setItem('simagol.calendar',calendarSystem()==='persian'?'gregory':'persian');appearance();route();};
-$('#theme').onclick=()=>{state.dark=!state.dark;preference().catch(e=>notify(t(e.message)));};
 $('#favorites').onclick=()=>{state.category='all';$('#search').value='';location.hash=location.hash==='#favorites'?'catalog':'favorites';$('#catalog').scrollIntoView();collection();};
 setupInstall($('#install-app'),(fa,en)=>notify(state.lang==='fa'?fa:en));
 $('.close').onclick=closeView;

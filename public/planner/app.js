@@ -1,3 +1,5 @@
+import {appearanceControls,accountTheme} from '../components/appearance.js';
+import {api} from '../components/ui.js';
 import {calendarSystem,dateLocale,calendarParts,monthStart,monthLength,addDays,inputDate,readDate} from '../components/calendar.js';
 import { HOLIDAYS, eventsInMonth, dueAlerts, localDate } from './dates.js';
 import { initDevice } from './device.js';
@@ -6,6 +8,9 @@ import { renderNavigation } from '../components/navigation.js';
 import { newPlanner, loadPlanner, savePlanner, collectAlerts, removeEntry, upsert, validLink, validZone } from './store.js';
 
 const copy = {
+  calendarView:['تقویم','Calendar'],
+  addReminder:['افزودن یادآوری','Add reminder'],
+
   legacy:['انتقال مناسبت‌های قبلی این مرورگر','Import previous browser occasions'],
   regionalList:['مناسبت‌های این ماه','Occasions this month'],
   deviceHelp:['برای اعلان پس‌زمینه، اعلان‌های دستگاه را فعال کنید.','Enable device notifications for background reminders.'],
@@ -125,6 +130,7 @@ async function refreshGreeting(){
   if(me!==undefined){if(id && cachedViewer()!==id)localStorage.setItem(viewerKey,JSON.stringify({id,expires:Date.now()+24*3600000}));else if(!id)localStorage.removeItem(viewerKey);}
   if(owner!==id){$('#editor').close();$('#confirm').close();blocked='';}
   owner=id;customerName=me?.name||'';
+  accountTheme(me?.prefs);if(me?.prefs?.lang)lang=me.prefs.lang;
   try{
     model=id?loadPlanner(localStorage,new Date(),id):newPlanner();
     if(model.region==='IN')model.region='IR';
@@ -160,12 +166,10 @@ async function mutation(action,body){
     savePlanner(localStorage,model,owner);return info;
   }catch(e){announce(e.message);return null;}
 }
-let dark = false;
 let blocked = '';
 let model = newPlanner();
 try {
   lang = JSON.parse(localStorage.getItem('simagol.lang')) === 'en' ? 'en' : 'fa';
-  dark = JSON.parse(localStorage.getItem('simagol.dark')) === true;
 
 } catch (error) { blocked = error instanceof SyntaxError || error.message === 'storageInvalid' ? 'storageInvalid' : 'storageError'; }
 let selected = localDate(new Date(),model.timeZone);
@@ -200,10 +204,6 @@ function commit(change) {
 }
 function snapshot() { return {authenticated:verified,entries:model.entries,time:model.time,timeZone:model.timeZone,lang}; }
 function sync() { if (device) Promise.resolve(device.sync()).catch(e=>announce(e.message)); }
-function storePreference(key,val) {
-  try { localStorage.setItem('simagol.'+key,JSON.stringify(val)); }
-  catch { announce(text('storageError')); }
-}
 function displayDate(date) {
   selected=date;
 
@@ -215,16 +215,12 @@ function appearance() {
   renderGreeting($('.brand small'), customerName, lang);
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';
-  document.documentElement.classList.toggle('dark',dark);
+  drawControls(lang);
   document.title=text('title')+' | '+text('brand');
   document.querySelectorAll('[data-label]').forEach(el => el.textContent=text(el.dataset.label));
-  $('#language').textContent=lang==='fa'?'EN':'FA';
-  $('#language').ariaLabel=lang==='fa'?'English':'فارسی';
-  $('#theme').textContent=text(dark?'light':'dark');
-  $('#theme').setAttribute('aria-pressed',String(dark));
   $('#previous').textContent=lang==='fa'?'›':'‹'; $('#previous').ariaLabel=text('previous');
   $('#next').textContent=lang==='fa'?'‹':'›'; $('#next').ariaLabel=text('next');
-  $('#new').textContent=text(owner?'add':'signIn');
+  $('.planner-views').setAttribute('aria-label',text('title'));
   $('#calendar-system').value=calendarSystem();$('#prefs').hidden=!owner;
   $('#sms-settings').hidden=!verified;$('#sms-phone').hidden=!smsAvailable;$('#sms-help').hidden=smsAvailable;
   if(!verified||!smsAvailable)$('#sms-code').hidden=true;$('#verified').textContent=phone;
@@ -246,9 +242,13 @@ function eventRow(entry) {
     (entry.link && validLink(entry.link)?'<a href="'+escape(entry.link)+'" target="_blank" rel="noopener noreferrer">'+text('openLink')+'</a>':'');
   return row(title(entry),meta,actions,entry.notes?'<p>'+escape(entry.notes)+'</p>':'');
 }
-function holidayRow(h) {
+function holidayRow(h,includeDate=true) {
   const existing=model.entries.find(x=>x.holidayId===h.id);
-  return row(title(h),dateText(h.date),existing?button('edit',existing.id,'savedHoliday'):button('choose',h.id+'@'+h.date,owner?'choose':'signIn'));
+  const action=existing?'edit':'choose';
+  const value=existing?existing.id:h.id+'@'+h.date;
+  const label=text(existing?'edit':'addReminder')+' · '+title(h);
+  return '<article class="occasion-line"><div><strong>'+escape(title(h))+'</strong>'+
+    (includeDate?'<small>'+escape(dateText(h.date))+'</small>':'')+'</div><button type="button" class="occasion-add" data-'+action+'="'+escape(value)+'" aria-label="'+escape(label)+'" title="'+escape(label)+'">'+(existing?'✓':'+')+'</button></article>';
 }
 function calendar() {
   const system=calendarSystem();
@@ -274,8 +274,10 @@ function calendar() {
   $('#days').innerHTML=cells.join('');
   $('#selected-title').textContent=dateText(selected,{weekday:'long',month:'long',day:'numeric'});
   const picked=rows.filter(x=>x.date===selected && !(x.source==='holiday' && model.entries.some(e=>e.holidayId===x.id)));
-  $('#selected').innerHTML=picked.map(x=>x.source==='holiday'?holidayRow(x):eventRow(x)).join('')||'<p class="hint">'+text('noDay')+'</p>';
-  $('#regional').innerHTML=rows.filter(x=>x.source==='holiday').map(holidayRow).join('')||text('noDay');
+  $('#selected').innerHTML=picked.map(x=>x.source==='holiday'?holidayRow(x,false):eventRow(x)).join('')||'<p class="hint">'+text('noDay')+'</p>';
+  $('#regional').innerHTML=rows.filter(x=>x.source==='holiday').map(h=>holidayRow(h)).join('')||text('noDay');
+  $('#sheet-title').textContent=$('#selected-title').textContent;
+  $('#sheet-events').innerHTML=$('#selected').innerHTML;
   $('#coverage').textContent=model.region==='IR'&&end>'2027-03-20'?text('coverage'):'';
 
 }
@@ -302,7 +304,11 @@ function configureReminder() {
   $('#holiday-lead').hidden=!occasion;
 }
 function openEditor(entry,holiday) {
+  if(!owner && navigator.onLine){
+    try{sessionStorage.setItem('simagol.newReminder',JSON.stringify({date:holiday?.date||selected,holidayId:holiday?.id}));}catch{}
+  }
   if(!requireAccount())return;
+  if($('#day-sheet').open)$('#day-sheet').close();
   editTarget=entry;
   form.reset();
   const rule=holiday || HOLIDAYS.find(h=>h.id===entry?.holidayId);
@@ -340,13 +346,37 @@ function scanAlerts() {
 function moveMonth(delta) {
   const sys=calendarSystem(),[y,m]=calendarParts(selected,sys);displayDate(monthStart(y,m+delta,sys));calendar();
 }
-$('#language').onclick=()=>{
-  lang=lang==='fa'?'en':'fa';storePreference('lang',lang);appearance();sync();
-};
-$('#theme').onclick=()=>{dark=!dark;storePreference('dark',dark);appearance();};
+const drawControls=appearanceControls(async prefs=>{
+  lang=prefs.lang;appearance();sync();
+  if(verified)try{await api('profile','POST',{prefs});}catch(e){announce(e.message);}
+});
 $('#calendar-system').onchange=e=>{localStorage.setItem('simagol.calendar',e.target.value);render();};
 $('#region').onchange=e=>{model.region=e.target.value;if(owner)commit(s=>({...s,region:e.target.value}));calendar();};
-$('#new').onclick=()=>openEditor();
+let activeView='calendar';
+let plannerReady=false;
+function displayView(){
+  const name=location.hash.slice(1);
+  if(name==='new' && !plannerReady)return;
+  if(name==='new')history.replaceState(null,'','#'+activeView);
+  else activeView=['occasions','reminders'].includes(name)?name:'calendar';
+  document.querySelectorAll('[data-view]').forEach(el=>el.hidden=el.dataset.view!==activeView);
+  document.querySelectorAll('.planner-views a').forEach(link=>{
+    if(link.hash==='#'+activeView)link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
+  });
+  if(name==='new')openEditor();
+}
+function resumeEditor(){
+  let intent;
+  try{intent=JSON.parse(sessionStorage.getItem('simagol.newReminder'));sessionStorage.removeItem('simagol.newReminder');}catch{}
+  if(!owner||!intent||$('#editor').open||!/^\d{4}-\d{2}-\d{2}$/.test(intent.date))return;
+  displayDate(intent.date);calendar();
+  const holiday=HOLIDAYS.find(h=>h.id===intent.holidayId);
+  openEditor(undefined,holiday?{...holiday,date:intent.date}:undefined);
+}
+$('#close-day').onclick=()=>$('#day-sheet').close();
+window.addEventListener('hashchange',displayView);
+displayView();
 $('#cancel').onclick=()=>$('#editor').close();
 $('#keep').onclick=()=>$('#confirm').close();
 $('#today').onclick=()=>{displayDate(localDate(new Date(),model.timeZone));calendar();};
@@ -362,7 +392,7 @@ $('#remove').onclick=async()=>{
 document.addEventListener('click',event=>{
   const b=event.target.closest('button');
   if(!b) return;
-  if(b.dataset.day) { selected=b.dataset.day;calendar();document.querySelector('[data-day="'+selected+'"]')?.focus(); }
+  if(b.dataset.day) { selected=b.dataset.day;calendar();document.querySelector('[data-day="'+selected+'"]')?.focus({preventScroll:true}); if(matchMedia('(max-width:760px)').matches)$('#day-sheet').showModal(); }
   if(b.dataset.choose){const [id,date]=b.dataset.choose.split('@');openEditor(undefined,{...HOLIDAYS.find(x=>x.id===id),date});}
   if(b.dataset.edit) { const entry=model.entries.find(x=>x.id===b.dataset.edit);if(entry)openEditor(entry); }
   if(b.dataset.delete) {
@@ -392,7 +422,7 @@ form.onsubmit=async e=>{
   if(!entry.date){$('#form-error').textContent=text('invalid');return;}
   if(rule){const prior=model.entries.find(x=>x.holidayId===rule.id);if(prior)entry.id=prior.id;}
   if(!await mutation('save',{entry,time:model.time,zone:model.timeZone})){ $('#form-error').textContent=$('#status').textContent;return; }
-  $('#editor').close();displayDate(entry.date);render();announce(text('saved'));sync();
+  $('#editor').close();displayDate(entry.date);render();if(!rule && !editTarget)location.hash='occasions';announce(text('saved'));sync();
 };
 $('#follow-zone').onchange=e=>{
   $('#zone').disabled=e.target.checked;
@@ -431,6 +461,7 @@ $('#sms-phone').onsubmit=async e=>{e.preventDefault();if(await mutation('request
 $('#sms-code').onsubmit=async e=>{e.preventDefault();const code=e.target.code.value.replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776));if(await mutation('verify',{code})){e.target.reset();e.target.hidden=true;appearance();}};
 window.addEventListener('online',refreshGreeting);
 appearance();await refreshGreeting();
+plannerReady=true;displayView();if(owner)resumeEditor();
 if(blocked)announce(text(blocked));
 try {
   device=await initDevice({getSnapshot:snapshot,onMessage:announce,onChange:scanAlerts});

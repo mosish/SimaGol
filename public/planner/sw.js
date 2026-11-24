@@ -1,5 +1,5 @@
 // Bump this version when changing an asset in a source deployment.
-const cacheName = 'simagol-planner-shell-v5';
+const cacheName = 'simagol-planner-shell-v6';
 const shell = '/planner/';
 const assets = [
   shell, '/planner/index.html', '/planner/manifest.json', '/planner/planner.css',
@@ -8,7 +8,7 @@ const assets = [
   '/', '/index.html', '/shop.css', '/app.js', '/labels.json',
   '/components/greeting.js', '/components/navigation.js', '/components/icons.js',
   '/components/install.js', '/components/ui.js', '/components/home.js', '/components/store.js',
-  '/components/account.js', '/components/calendar.js', '/planner/iran.js',
+  '/components/account.js', '/components/appearance.js', '/components/calendar.js', '/planner/iran.js',
   '/images/meadow.jpg', '/images/hero.jpg', '/images/roses.jpg', '/images/lilies.jpg', '/images/tulips.jpg',
 ];
 const cachedPaths = new Set(assets);

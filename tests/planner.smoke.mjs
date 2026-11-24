@@ -31,7 +31,7 @@ try {
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   assert.equal(await page.locator('#region').inputValue(),'IR');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),'mobile reflow');
-  await page.locator('#language').click();
+  await page.locator('#language [value=en]').check();
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
 
   // The browser must install the real shell before the network is removed.
@@ -47,7 +47,10 @@ try {
 
   const editor=page.locator('#event-form');
   const input=key=>editor.locator('[name="'+key+'"]');
-  await page.locator('#new').click();
+  await page.locator('.days .has-events').first().click();
+  const choose=page.locator('#sheet-events [data-choose]').first();
+  const chosen=await choose.getAttribute('data-choose');
+  await choose.click();
   await page.waitForURL('**/#account/planner-login');
   await page.locator('summary').filter({hasText:'Register'}).click();
   const registration=page.locator('[data-form="Register"]');
@@ -56,9 +59,11 @@ try {
   await registration.locator('[name=password]').fill('test-only-flower-planner');
   await registration.locator('[type=submit]').click();
   await page.waitForURL('**/planner/');
-  await page.waitForFunction(()=>document.querySelector('#new').textContent==='Add an occasion');
+  await page.locator('#editor[open]').waitFor();
+  assert.equal(await editor.getAttribute('data-holiday'),chosen.split('@')[0]);
+  await page.locator('#cancel').click();
   await page.locator('#calendar-system').selectOption('gregory');
-  await page.locator('#new').click();
+  await page.locator('[data-tab=plus]').click();
   await input('type').selectOption('birthday');
   await input('name').fill('Birthday smoke');
   await input('date').fill('2028-06-11');
@@ -75,22 +80,32 @@ try {
   await editor.locator('[type=submit]').click();
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
 
+  await page.locator('.planner-views [href="#calendar"]').click();
   await page.locator('#region').selectOption('US');
   await page.locator('#previous').click();
-  await page.locator('.regional-list summary').click();
-  await page.locator('[data-choose^="us-mothers@"]').click();
+  await page.locator('[data-day="2028-05-14"]').click();
+  await page.locator('#day-sheet[open]').waitFor();
+  const addMother=page.locator('#sheet-events [data-choose^="us-mothers@"]');
+  assert.equal(await addMother.textContent(),'+');
+  await addMother.click();
   assert.ok(await input('annual').isDisabled());
   assert.ok(await page.locator('#holiday-lead').isVisible());
   await editor.locator('[type=submit]').click();
+  await page.locator('.planner-views [href="#reminders"]').click();
+  await page.locator('#inbox').waitFor();
+  assert.ok(!await entries.isVisible());
+  await page.locator('.planner-views [href="#occasions"]').click();
   await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
 
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded'});
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
   assert.equal(await page.locator('#region').inputValue(),'US');
+  await page.locator('.planner-views [href="#calendar"]').click();
   const nextDate=await page.locator('#month-title').textContent();
   await page.locator('#next').click();
   assert.notEqual(await page.locator('#month-title').textContent(),nextDate);
+  await page.locator('.planner-views [href="#occasions"]').click();
   await birthday.locator('[data-delete]').click();
   await page.locator('#remove').click();
   await birthday.waitFor({state:'detached'});
@@ -104,10 +119,15 @@ try {
   await page.locator('.header-cart').click();
   await page.locator('#tab-page h2').waitFor();
   await page.locator('[data-tab="bell"]').click();
+  await page.locator('.planner-views [href="#occasions"]').click();
   await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
   await context.setOffline(false);
   await page.reload();
   await page.waitForFunction(async()=>(await (await fetch('/api/planner')).json()).entries.every(e=>e.name!=='Birthday smoke'));
+  await page.locator('[data-tab=home]').click();
+  await page.locator('[data-tab=plus]').click();
+  await page.locator('#editor[open]').waitFor();
+  assert.equal(await editor.getAttribute('data-holiday'),'');
   assert.deepEqual(pageErrors,[]);
   console.log('Mobile Chromium verified planner CRUD, Solar/Gregorian selection and authenticated saves, standalone manifest, offline reload and offline edits.');
 } finally {

@@ -34,12 +34,12 @@ try {
   await page.locator('.product').first().waitFor();
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   assert.equal(await page.locator('.product').count(),4);
-  assert.equal(await page.locator('.app-tabs a').count(),4);
+  assert.equal(await page.locator('.app-tabs a').count(),5);
   assert.equal(await page.locator('.product .pic').first().getAttribute('href'),'#product/lily');
   assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
-  await page.locator('#language').click();
+  await page.locator('#language [value=en]').check();
   await page.waitForFunction(()=>document.documentElement.lang==='en' && document.documentElement.dir==='ltr');
-  await page.locator('#theme').click();
+  await page.locator('#theme [value=dark]').check();
   await page.reload();
   await page.waitForFunction(()=>document.documentElement.classList.contains('dark'));
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
@@ -63,7 +63,7 @@ try {
   const planner=await page.context().newPage();
   await planner.goto(origin+'/planner/');
   await planner.waitForFunction(()=>document.querySelector('.brand small').textContent==='Hello, Test Buyer');
-  await planner.locator('#language').click();
+  await planner.locator('#language [value=fa]').check();
   assert.equal(await planner.locator('.brand small').textContent(),'سلام Test Buyer جان');
   await planner.close();
   await checkout.locator('[name=phone]').fill('09123456789');

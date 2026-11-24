@@ -150,6 +150,10 @@ export function profile(db, id, body) {
             prefs.favorites.some(id => typeof id !== 'string' || !/^[a-z0-9-]{1,80}$/.test(id))) fail(400,'Invalid preferences');
         account.prefs.favorites = [...new Set(prefs.favorites)];
       }
+      if ('themeMode' in prefs) {
+        if(!['dark','auto','light'].includes(prefs.themeMode)) fail(400,'Invalid preferences');
+        account.prefs.themeMode=prefs.themeMode;
+      }
       if ('dark' in prefs) {
         if (typeof prefs.dark !== 'boolean') fail(400, 'Invalid preferences');
         account.prefs.dark = prefs.dark;

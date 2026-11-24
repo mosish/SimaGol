@@ -1,3 +1,4 @@
+import {appearanceControls,accountTheme} from './appearance.js';
 import {state,api,t,label,field,button,persist} from './ui.js';
 import {admin} from './admin.js';
 import {invoice} from './account.js';
@@ -6,7 +7,7 @@ const $=q=>document.querySelector(q);
 async function render(){
   document.documentElement.dir=state.lang==='fa'?'rtl':'ltr';
   document.documentElement.lang=state.lang;
-  $('#language').textContent=state.lang==='fa'?'EN':'FA';
+  drawControls(state.lang);
   $('#calendar').textContent=calendarSystem()==='persian'?'شمسی':'Gregorian';
   $('#logout').hidden=!state.me;
   if(!state.me){$('#workspace').innerHTML='<h1>'+label('Login')+'</h1><form data-form="login">'+field('email','Email','','email')+field('password','Password','','password')+button('Login')+'</form>';return;}
@@ -18,10 +19,13 @@ async function render(){
   $('#workspace').innerHTML=await admin();
 }
 async function refresh(){
-  const [me,shop]=await Promise.all([api('me'),api('store')]);Object.assign(state,{me,...shop});await render();
+  const [me,shop]=await Promise.all([api('me'),api('store')]);Object.assign(state,{me,...shop});accountTheme(me?.prefs);if(me?.prefs?.lang)state.lang=me.prefs.lang;await render();
 }
 function error(e){$('#status').textContent=t(e.message);}
-$('#language').onclick=()=>{state.lang=state.lang==='fa'?'en':'fa';persist('lang',state.lang);render().catch(error);};
+const drawControls=appearanceControls(async prefs=>{
+  state.lang=prefs.lang;await render();
+  if(state.me)try{await api('profile','POST',{prefs});}catch(e){error(e);}
+});
 $('#calendar').onclick=()=>{localStorage.setItem('simagol.calendar',calendarSystem()==='persian'?'gregory':'persian');render().catch(error);};
 $('#logout').onclick=async()=>{await api('logout','POST',{});localStorage.removeItem('simagol.planner.viewer');await refresh();};
 window.addEventListener('hashchange',()=>render().catch(error));

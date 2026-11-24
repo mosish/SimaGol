@@ -56,3 +56,27 @@ select, #prefs input { font: inherit; color: var(--text); background: var(--bg);
 }
 
 [hidden]{display:none !important;}
+
+.planner-title {margin:20px 0 10px;font-weight:700;line-height:1.5;font-family:inherit;font-size:clamp(1.15rem,2vw,1.5rem);}
+.planner-views {display:flex;flex-wrap:wrap;gap:4px;width:fit-content;margin:0 0 14px;padding:4px;border:1px solid var(--line);border-radius:15px;background:var(--surface);}
+.planner-views a {display:grid;place-items:center;min-height:42px;padding:0 .85rem;border-radius:11px;font-size:.88rem;}
+.planner-views [aria-current] {background:var(--hero);color:var(--plum);font-weight:700;}
+.planner-layout {grid-template-columns:minmax(300px,1.2fr) minmax(260px,1fr);gap:14px;}
+.planner-layout .sheet {margin:0;padding:clamp(12px,2vw,20px);}
+.regional-list {grid-column:1/-1;margin-bottom:20px!important;}
+.day-summary {position:sticky;top:12px;max-height:65vh;overflow:auto;}
+.day-summary h2,#day-sheet h2 {font-family:inherit;font-size:1.05rem;}
+.calendar-options {display:flex;align-items:end;gap:12px;flex-wrap:wrap;}
+.calendar-options .region-label {margin:0;}
+.occasion-line {display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:6px 0;min-height:48px;}
+.occasion-line strong {font-size:.94rem;font-weight:550;}
+.occasion-line small {display:block;color:var(--muted);}
+.occasion-add {display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:50%;background:var(--hero);color:var(--plum);font-size:1.5rem;line-height:1;}
+#day-sheet {width:min(94vw,460px);max-height:75dvh;overflow:auto;}
+@media(max-width:760px){
+  .planner-layout {grid-template-columns:minmax(0,1fr);}
+  .day-summary {position:static;max-height:none;}
+  .calendar-options {gap:8px;}
+  .planner-views a {padding:0 .6rem;}
+  #day-sheet[open] {position:fixed;inset:auto 0 0;margin:0 auto;width:100%;border-radius:20px 20px 0 0;padding-bottom:calc(18px + env(safe-area-inset-bottom));}
+}
