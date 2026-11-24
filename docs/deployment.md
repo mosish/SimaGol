@@ -2,6 +2,12 @@
 
 The application serves the storefront and JSON API from one long-running Node process. Choose a small Linux host with Docker Compose and a local persistent disk, or a Node-capable hosting plan with process restart, HTTPS proxying and persistent writable storage. A PHP-only shared hosting plan or static pages service cannot execute this shop's API. SQLite currently supports one application instance in this deployment. Place the database and uploads on the same persistent volume. Add capacity measurements and a database migration plan before scaling to multiple replicas.
 
+## Phase 5 purchase and domain choice
+
+Complete local development and acceptance first. The owner plans to buy hosting from HostIran at deployment. Its [Linux](https://hostiran.net/host/linux) and [DirectAdmin](https://hostiran.net/host/direct-admin) packages are candidates. Before ordering, confirm that the specific package can run Node.js 24.13 or newer with built-in SQLite, keep the application running between requests and restart it, persist the database and uploads, and reach Web Push services over outbound HTTPS. If the package cannot run the application, select a compatible HostIran service before purchase.
+
+Use `http://localhost:3000` during development. At launch, use `APP_ORIGIN=https://simagol.com` if the owner selects that domain, or substitute the final HTTPS origin. Before launch, changing this choice only affects deployment configuration. After launch, moving to a different domain also requires new DNS and TLS, redirects from the old domain, and a plan for customers' devices. Planner entries are stored per origin. Keep the old planner accessible during migration so users can recover their dates, then have them reinstall the app and enable push on the new origin. Verify any enabled payment callback URLs on the new domain.
+
 ## 1. Prepare the host, domain and origin
 
 1. Choose a domain and compare registration, renewal and transfer terms. Register in the shop owner's account, enable MFA and set renewal reminders. Record the host's public IP and recovery contact.

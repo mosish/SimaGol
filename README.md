@@ -2,6 +2,21 @@
 
 SimaGol is a bilingual flower shop for customers who want to choose an arrangement, send it to a recipient and follow its delivery. Persian opens right-to-left by default. The visible FA/EN and theme controls switch the entire interface. The clay-style surfaces work in both light and dark modes.
 
+## Five-phase delivery plan
+
+The working domain is `simagol.com`. Develop against `localhost` and select the final domain at launch. HostIran is the preferred provider. The owner plans to buy hosting in Phase 5, once the project has passed local acceptance.
+
+1. **Local foundation and UX design**
+   - [ ] Review the Persian mobile journey from an occasion reminder to bouquet selection and checkout with the shop owner. Use the local application and Figma for review.
+2. **Bilingual design system**
+   - [ ] Approve desktop and mobile layouts, RTL/LTR switching, light/dark surfaces, accessible controls and the editable Sima placeholder.
+3. **Storefront and occasion planner**
+   - [ ] Verify catalog, gifting, delivery, account and order tracking together. Test the offline planner and its three-day and one-day reminders.
+4. **Admin and local acceptance**
+   - [ ] Have staff edit inventory, bilingual content and delivery options, then fulfil a test order. Complete automated tests and review the release with the owner.
+5. **Hosting purchase and deployment**
+   - [ ] Select a compatible HostIran plan and the final domain, configure DNS and HTTPS, and set `APP_ORIGIN` on the host. Verify the release, backup restoration and mobile installation/push on that origin before opening checkout. Follow the [deployment runbook](docs/deployment.md).
+
 ## Occasion planner PWA
 
 Open [/planner/](http://localhost:3000/planner/) for the Persian/English installable occasion calendar. Personal dates, gift notes and the reminder inbox persist on the device. Regional observances support automatic three-day and one-day flower reminders. See the [planner setup and mobile testing checklist](docs/planner.md), [regional rules](docs/occasions.md) and [background push setup](docs/planner-push.md).
