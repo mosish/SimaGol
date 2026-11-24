@@ -34,6 +34,10 @@ try {
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),'mobile reflow');
   await page.locator('#language [value=en]').check();
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+  const dock=page.locator('.app-tabs [data-tab]');
+  assert.deepEqual(await dock.allInnerTexts(),['','','','','']);
+  assert.deepEqual(await dock.evaluateAll(items=>items.map(el=>el.getAttribute('aria-label'))),
+    ['Home','Bouquet studio','Create reminder','Reminders','Profile']);
 
   // The browser must install the real shell before the network is removed.
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
@@ -173,6 +177,10 @@ try {
   await login.locator('[type=submit]').click();
   await guest.locator('#editor[open]').waitFor();
   assert.equal(await guest.locator('#event-form [name=type]:checked').inputValue(),'anniversary');
+  await guest.locator('#cancel').click();
+  await guest.locator('#language [value=en]').check();
+  await guest.locator('.planner-views [href="#occasions"]').click();
+  await guest.locator('#entries').getByRole('heading',{name:"Father's Day"}).waitFor();
   await guest.close();
   const desktop=await browser.newPage({viewport:{width:1280,height:800}});
   await desktop.goto(origin+'/planner/');
@@ -193,6 +201,9 @@ try {
   await desktop.locator('#selected').getByRole('heading',{name:'Tea with family'}).waitFor();
   await desktop.locator('#selected').getByRole('button',{name:'New occasion',exact:true}).waitFor();
   await desktop.close();
+  await page.goto(origin+'/planner/#occasions');
+  await page.reload();
+  await page.locator('#entries').getByRole('heading',{name:'Tea with family'}).waitFor();
   assert.deepEqual(pageErrors,[]);
   console.log('Mobile Chromium verified planner CRUD, Solar/Gregorian selection and authenticated saves, standalone manifest, offline reload and offline edits.');
 } finally {

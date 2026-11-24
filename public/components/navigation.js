@@ -131,7 +131,7 @@ function createNavigation(bar) {
       const link = document.createElement('a');
       link.dataset.tab = key;
       link.href = key==='home' && location.pathname==='/' ? '#' : href;
-      link.innerHTML = '<i class="nav-symbol">'+icon(key)+'</i><span></span>';
+      link.innerHTML = '<i class="nav-symbol" aria-hidden="true">'+icon(key)+'</i>';
       bar.append(link);
     }
   }
@@ -158,11 +158,9 @@ export function renderNavigation(active, lang, quantity = 0) {
   for (const [key, , persian, english] of tabs) {
     const item = bar.querySelector('[data-tab="'+key+'"]');
     const label = fa ? persian : english;
-    if (key === 'plus') {
-      item.setAttribute('aria-label',label);
-      item.title = label;
-    } else {
-      item.lastElementChild.textContent = label;
+    item.setAttribute('aria-label',label);
+    item.title = label;
+    if (key !== 'plus') {
       if (active === key) item.setAttribute('aria-current','page');
       else item.removeAttribute('aria-current');
     }

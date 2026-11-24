@@ -1050,12 +1050,10 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-direction: column;
-  gap: 1px;
+  justify-content: center;
   height: 100%;
   min-width: 0;
-  padding: 0 1px 5px;
+  padding: 0;
   border-radius: 14px;
   color: var(--ink);
   font-size: .72rem;
@@ -1069,7 +1067,6 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   height: 29px;
 }
 .app-tabs svg { width: 22px; height: 22px; stroke-width: 1.8; }
-.app-tabs [data-tab="plus"] { justify-content: center; padding: 0; }
 .app-tabs [data-tab="plus"] .nav-symbol {
   width: 42px;
   height: 42px;
@@ -1088,7 +1085,6 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   height: 50px;
   width: 50px;
 }
-.app-tabs [aria-current="page"] > span { color: var(--gold); }
 .app-tabs [aria-expanded="true"] svg { transform: rotate(45deg); }
 .app-tabs :focus-visible { outline: 2px solid var(--plum); outline-offset: 3px; }
 #quick-reminders {
