@@ -91,6 +91,17 @@ try {
   assert.match(await page.locator('.invoice').textContent(),/Test gift/);
   await page.locator('.close').click();
   await page.locator('[data-tab="profile"]').click();
+  await page.locator('.profile-menu').waitFor();
+  for(const mode of ['light','dark']){
+    await page.locator('#theme [value='+mode+']').check();
+    const shared=await page.evaluate(()=>{
+      const root=getComputedStyle(document.documentElement);
+      const profile=getComputedStyle(document.querySelector('.profile-dashboard'));
+      return [['--panel','--surface'],['--inset','--bg'],['--edge','--line'],['--active','--hero'],['--highlight','--plum']]
+        .every(([local,global])=>profile.getPropertyValue(local).trim()===root.getPropertyValue(global).trim());
+    });
+    assert.ok(shared,'Profile uses the storefront palette in '+mode+' mode');
+  }
   await page.locator('[href="#account/orders"]').click();
   await page.locator('#history .order').waitFor();
   await page.locator('[data-logout]').click();

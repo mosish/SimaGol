@@ -1,5 +1,5 @@
 // Bump this version when changing an asset in a source deployment.
-const cacheName = 'simagol-planner-shell-v9';
+const cacheName = 'simagol-planner-shell-v10';
 const shell = '/planner/';
 const assets = [
   shell, '/planner/index.html', '/planner/manifest.json', '/planner/planner.css',
