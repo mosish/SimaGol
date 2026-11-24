@@ -4,7 +4,7 @@ The five JPEG assets in `public/images/` were generated for this prototype using
 
 | File | Arrangement |
 | --- | --- |
-| `hero.jpg` | Pink garden arrangement in a ribbed vase |
+| `hero.jpg` | Panoramic rose and ranunculus arrangement against a plum backdrop |
 | `roses.jpg` | Blush-wrapped pink roses |
 | `tulips.jpg` | Apricot tulips in peach wrap |
 | `meadow.jpg` | Lavender and white meadow bouquet |

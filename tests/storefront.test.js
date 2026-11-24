@@ -34,7 +34,6 @@ test('FA/EN names, category filters, scoped favorite search and product detail',
   state.lang='en'; state.category=favoritesFilter; state.favorites=[p.id];
   collection();
   assert.equal((nodes.get('#products').innerHTML.match(/class="product"/g)||[]).length,1);
-  assert.equal(nodes.get('.section-title h2').textContent,t('New arrivals'));
   document.querySelector('#search').value=p.name.en;
   collection();
   assert(nodes.get('#products').innerHTML.includes(p.name.en));

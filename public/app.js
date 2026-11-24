@@ -34,7 +34,7 @@ function appearance() {
   document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
   $('.close').ariaLabel=t('Close');
   $('#search').ariaLabel=t('Search');$('#search').placeholder=t('Search');
-  $('#hero-mascot').innerHTML=mascot('hero');
+  $('#hero-mascot').innerHTML=state.settings.mascot?.hero?mascot('hero'):'';
   $('.hero').hidden=state.settings.showHero===false;
   $('.hero-photo img').src='/'+(state.settings.hero||'images/hero.jpg');
   const logo=$('#logo');

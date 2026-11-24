@@ -23,7 +23,6 @@ export function collection() {
   const fav = state.category === favoritesFilter;
   const q = normalize($('#search').value);
   const cats = state.catalog.categories;
-  $('.section-title h2').textContent = t('New arrivals');
   const rows = state.catalog.products.filter(p => (fav ? state.favorites.includes(p.id) : state.category==='all' || state.category===p.category)
     && normalize(p.name[state.lang]+' '+p.description[state.lang]).includes(q)).reverse();
   $('#results').textContent = num(rows.length)+' '+t('products');

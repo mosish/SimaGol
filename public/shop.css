@@ -1392,3 +1392,58 @@ html[dir=ltr] .profile-menu a svg:last-child {transform:rotate(180deg);}
   .auth-card form { animation:auth-fields-in .23s ease-out; }
   @keyframes auth-fields-in { from { opacity:.45; transform:translateY(4px); } }
 }
+
+/* A shallow, full-width photographic cover leaves the catalog within reach. */
+.hero.floral-cover {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  min-height: clamp(154px, 17vw, 224px);
+  margin: 0;
+  background: #492831;
+  border-radius: clamp(16px, 2vw, 24px);
+}
+.floral-cover .hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  min-height: 0;
+  background: #492831;
+}
+.floral-cover .hero-photo img { object-position: 50% 50%; }
+[dir=ltr] .floral-cover .hero-photo img { transform: scaleX(-1); }
+.floral-cover .hero-copy {
+  width: 56%;
+  padding: clamp(16px, 3.4vw, 46px);
+  background: none;
+  color: #fff7f2;
+  text-shadow: 0 1px 5px #30141cc4;
+}
+.floral-cover .hero-copy::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  inset: -250% -18% -250% 0;
+  background: linear-gradient(to left, #301520b8, #30152065 72%, transparent);
+}
+[dir=ltr] .floral-cover .hero-copy::before {
+  inset: -250% 0 -250% -18%;
+  background: linear-gradient(to right, #301520b8, #30152065 72%, transparent);
+}
+.floral-cover h1 { margin: 0; font-size: clamp(1.12rem, 2.4vw, 2rem); }
+.floral-cover em { color: #ffdbd2; }
+.floral-cover p { margin: .38em 0 0; color: #fff0ea; line-height: 1.65; }
+#hero-mascot:empty { display: none; }
+.catalog-toolbar { flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 14px 0; }
+.catalog-toolbar .search {
+  flex: 0 1 clamp(170px, 23vw, 290px);
+  min-width: 0; background: var(--surface); border: 1px solid var(--line);
+}
+.catalog-toolbar .search:focus-within { outline: 2px solid var(--plum); outline-offset: 2px; }
+.catalog-toolbar .search input { width: 100%; }
+@media (max-width: 720px) {
+  .catalog-toolbar .search { flex: 1 0 100%; }
+  .catalog-toolbar { row-gap: 9px; }
+  .floral-cover .hero-copy { width: 60%; padding: 14px; }
+  .floral-cover p { font-size: .78rem; }
+}

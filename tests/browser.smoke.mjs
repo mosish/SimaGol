@@ -73,7 +73,16 @@ try {
   const favorites=filters.getByRole('radio',{name:'Favorites',exact:true});
   await favorites.check();
   assert.equal(page.url(),before);
-  assert.equal(await page.locator('.section-title h2').textContent(),'New arrivals');
+  assert.equal(await page.getByText('New arrivals',{exact:true}).count(),0);
+  for (const width of [390,1280]) {
+    await page.setViewportSize({width,height:900});
+    const hero=await page.locator('.floral-cover').boundingBox();
+    const search=await page.locator('.catalog-toolbar .search').boundingBox();
+    const products=await page.locator('#products').boundingBox();
+    assert.ok(hero.y+hero.height<=search.y+1);
+    assert.ok(Math.abs(hero.width-products.width)<2);
+    assert.ok(search.y+search.height<=products.y+1);
+  }
   assert.ok(await favorites.isChecked());
   await page.locator('[data-fav="blush"]').click();
   assert.equal(await page.locator('.product').count(),0);

@@ -40,11 +40,13 @@
 <div class="utilities"><a class="header-cart" href="#bag" aria-label="سبد خرید"></a><span class="appearance-controls"></span><button id="install-app" data-t="Install app" hidden></button></div>
 </div></header>
 <main>
-<div id="home-view"><section class="hero"><div class="hero-copy"><div class="signature"><span data-icon="sprig"></span><span data-t="eyebrow"></span></div><h1><span data-t="hero1"></span> <em data-t="hero2"></em></h1><p data-t="intro"></p><span id="hero-mascot"></span></div>
-<div class="hero-photo"><img src="/images/hero.jpg" alt="" fetchpriority="high"><div class="photo-stamp" aria-hidden="true"><span>SIMAGOL</span><i data-icon="sprig"></i><span>FLORAL STUDIO</span></div></div></section>
+<div id="home-view"><section class="hero floral-cover">
+<div class="hero-photo"><img src="/images/hero.jpg" alt="" fetchpriority="high"></div>
+<div class="hero-copy"><h1><span data-t="hero1"></span> <em data-t="hero2"></em></h1><p data-t="intro"></p><span id="hero-mascot"></span></div>
+</section>
 <aside id="banner" hidden></aside>
-<section id="catalog" tabindex="-1"><div class="section-head"><div class="section-title"><span class="tile" data-icon="flower"></span><h2 data-t="collection"></h2></div><label class="search"><span data-icon="search"></span><input type="search" id="search"></label></div>
-<div class="filter-row"><div class="filter-scroll"><div id="filters" role="radiogroup"></div></div><span id="results" aria-live="polite"></span></div>
+<section id="catalog" tabindex="-1" aria-labelledby="catalog-name"><h2 id="catalog-name" hidden data-t="Catalog"></h2>
+<div class="filter-row catalog-toolbar"><label class="search"><span data-icon="search"></span><input type="search" id="search"></label><div class="filter-scroll"><div id="filters" role="radiogroup"></div></div><span id="results" aria-live="polite"></span></div>
 <div id="products"></div></section>
 </div><section id="tab-page" tabindex="-1" hidden></section>
 </main><nav class="app-tabs"></nav>
