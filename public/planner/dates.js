@@ -4,9 +4,13 @@ const DAY = 86400000;
 const pad = n => String(n).padStart(2, '0');
 const isoDay = (year, month, day) => `${year}-${pad(month)}-${pad(day)}`;
 
-import {iranRules,lunarYearMasks} from './iran.js';
+import {iranRules,lunarYearMasks,heritageRules} from './iran.js';
 import {calendarParts,addDays,monthStart,monthLength} from '../components/calendar.js';
-const iran = iranRules.map(rule=>({...rule,region:'IR',name:{fa:rule.title,en:rule.title}}));
+const featuredIds=new Set(heritageRules.map(rule=>rule.id));
+const legacyIran = iranRules.map(rule=>({...rule,region:'IR',name:{fa:rule.title,en:rule.title}}));
+const oldById=new Map(legacyIran.map(rule=>[rule.id,rule]));
+const iran = heritageRules.map(rule=>({...oldById.get(rule.id),...rule,region:'IR'}))
+  .concat(legacyIran.filter(rule=>!featuredIds.has(rule.id)));
 const lunarMonths=[];
 let stamp=(2396005-2440588)*DAY;
 for(const [year,mask] of lunarYearMasks.entries()){
@@ -115,6 +119,7 @@ export function eventsInMonth({ year, month, region, events = [], holidayIds }) 
   }
   const rows = [];
   for (const holiday of HOLIDAYS) {
+    if(region==='IR' && !featuredIds.has(holiday.id))continue;
     if (holiday.region!==region || (holidayIds && !holidayIds.includes(holiday.id)))continue;
     for(const date of holidayDates(holiday.id,year)){
       if(Number(date.slice(5,7))===month)rows.push({...holiday,holidayId:holiday.id,date,source:'holiday'});
@@ -122,6 +127,7 @@ export function eventsInMonth({ year, month, region, events = [], holidayIds }) 
   }
   const prefix = `${year}-${pad(month)}-`;
   for (const event of events) {
+    if(region==='IR' && event.holidayId && !featuredIds.has(event.holidayId))continue;
     for (const date of occurrences(event,year)) if (date.startsWith(prefix)) rows.push({ ...event, date, source: 'custom' });
   }
   return rows.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));

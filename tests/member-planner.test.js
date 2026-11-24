@@ -14,7 +14,14 @@ test('Jalali inputs, leap Esfand, annual recurrence and Iranian lunar alignment'
   const events=[{id:'a',kind:'personal',annual:true,date:'2024-03-20',daysBefore:1,calendar:'persian'}];
   assert.equal(dueAlerts({events,timeZone:'UTC',from:'2025-03-19',to:'2025-03-21'})[0].date,'2025-03-21');
   const rows=eventsInMonth({year:2026,month:3,region:'IR'}).filter(r=>r.date==='2026-03-21');
-  assert.ok(rows.some(r=>r.id==='ir-nowruz')&&rows.some(r=>r.calendar==='Hijri'&&r.holiday));
+  assert.deepEqual(rows.map(r=>r.id),['ir-nowruz']);
+  const fullYear=Array.from({length:13},(_,i)=>eventsInMonth({year:i<10?2026:2027,month:(i+2)%12+1,region:'IR'})).flat()
+    .filter(r=>r.date>='2026-03-21'&&r.date<='2027-03-20');
+  assert.deepEqual(new Set(fullYear.filter(r=>r.calendar==='Hijri').map(r=>r.name.fa)),
+    new Set(['روز پدر','روز مادر','روز جوان','روز پرستار','روز جانباز','روز دختر']));
+  assert.ok(fullYear.some(r=>r.name.fa==='روز پدر'&&r.date==='2026-12-23'));
+  assert.ok(fullYear.some(r=>r.name.fa==='چهارشنبه‌سوری'&&r.date==='2027-03-16'));
+  assert.ok(!fullYear.some(r=>r.calendar==='Gregorian'));
 });
 
 test('account isolation, verified opt-in and deduplicated scheduled SMS',async()=>{

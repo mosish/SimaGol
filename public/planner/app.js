@@ -133,7 +133,7 @@ async function refreshGreeting(){
   accountTheme(me?.prefs);if(me?.prefs?.lang)lang=me.prefs.lang;
   try{
     model=id?loadPlanner(localStorage,new Date(),id):newPlanner();
-    if(model.region==='IN')model.region='IR';
+
     if(info){
       blocked='';
       for(const pending of model.outbox||[]){
@@ -221,7 +221,10 @@ function appearance() {
   $('#previous').textContent=lang==='fa'?'›':'‹'; $('#previous').ariaLabel=text('previous');
   $('#next').textContent=lang==='fa'?'‹':'›'; $('#next').ariaLabel=text('next');
   $('.planner-views').setAttribute('aria-label',text('title'));
-  $('#calendar-system').value=calendarSystem();$('#prefs').hidden=!owner;
+  $('#calendar-system').setAttribute('aria-label',text('system'));
+  $('#jump-month').ariaLabel=lang==='fa'?'ماه':'Month';
+  $('#jump-year').ariaLabel=lang==='fa'?'سال':'Year';
+  $('#prefs').hidden=!owner;
   $('#sms-settings').hidden=!verified;$('#sms-phone').hidden=!smsAvailable;$('#sms-help').hidden=smsAvailable;
   if(!verified||!smsAvailable)$('#sms-code').hidden=true;$('#verified').textContent=phone;
   $('#legacy').hidden=!verified||!localStorage.getItem('simagol.planner.v1')||!!localStorage.getItem('simagol.planner.imported');
@@ -250,14 +253,40 @@ function holidayRow(h,includeDate=true) {
   return '<article class="occasion-line"><div><strong>'+escape(title(h))+'</strong>'+
     (includeDate?'<small>'+escape(dateText(h.date))+'</small>':'')+'</div><button type="button" class="occasion-add" data-'+action+'="'+escape(value)+'" aria-label="'+escape(label)+'" title="'+escape(label)+'">'+(existing?'✓':'+')+'</button></article>';
 }
+const rangeStart='1900-01-01',rangeEnd='2100-12-31';
+function updateMonthControls(y,m,system){
+  const [minYear,minMonth]=calendarParts(rangeStart,system),[maxYear,maxMonth]=calendarParts(rangeEnd,system);
+  const months=$('#jump-month'),years=$('#jump-year');
+  const firstMonth=y===minYear?minMonth:1,lastMonth=y===maxYear?maxMonth:12;
+  const monthKey=[lang,system,firstMonth,lastMonth].join('-');
+  if(months.dataset.key!==monthKey){
+    months.replaceChildren();
+    for(let n=firstMonth;n<=lastMonth;n++)months.add(new Option(dateText(monthStart(y,n,system),{month:'long'}),n));
+    months.dataset.key=monthKey;
+  }
+  const yearKey=lang+system;
+  if(years.dataset.key!==yearKey){
+    years.replaceChildren();
+    for(let n=minYear;n<=maxYear;n++)years.add(new Option(number(n).replace(/[٬,]/g,''),n));
+    years.dataset.key=yearKey;
+  }
+  months.value=m;years.value=y;
+  $('#calendar-system input[value="'+system+'"]').checked=true;
+}
+function jumpTo(y,m){
+  const system=calendarSystem(),day=calendarParts(selected,system)[2];
+  const date=addDays(monthStart(y,m,system),Math.min(day,monthLength(y,m,system))-1);
+  displayDate(date<rangeStart?rangeStart:date>rangeEnd?rangeEnd:date);
+  calendar();
+}
 function calendar() {
   const system=calendarSystem();
   const [y,m]=calendarParts(selected,system);
   const first=monthStart(y,m,system),last=monthLength(y,m,system);
   const end=addDays(first,last-1),gregorianMonths=new Set([first.slice(0,7),end.slice(0,7)]);
-  const rows=[...gregorianMonths].flatMap(key=>{const [year,month]=key.split('-').map(Number);return eventsInMonth({year,month,region:model.region,events:model.entries});}).filter(r=>r.date>=first&&r.date<=end);
+  const rows=[...gregorianMonths].flatMap(key=>{const [year,month]=key.split('-').map(Number);return eventsInMonth({year,month,region:'IR',events:model.entries});}).filter(r=>r.date>=first&&r.date<=end);
   const today=localDate(new Date(),model.timeZone);
-  $('#region').value=model.region;
+  updateMonthControls(y,m,system);
   $('#month-title').textContent=dateText(first,{month:'long',year:'numeric'});
   $('#previous').disabled=first<='1900-01-01';$('#next').disabled=end>='2100-12-31';
   const start=system==='persian'?6:0;
@@ -268,7 +297,7 @@ function calendar() {
     const date=addDays(first,day-1);
     const count=rows.filter(x=>x.date===date && !(x.source==='holiday' && model.entries.some(e=>e.holidayId===x.id))).length;
     const label=dateText(date)+(count?' · '+number(count)+' '+text('dailyEvents'):'');
-    cells.push('<button type="button" data-day="'+date+'" aria-label="'+escape(label)+'" aria-pressed="'+(date===selected)+'" '+
+    cells.push('<button type="button" '+(date<rangeStart||date>rangeEnd?'disabled ':'')+'data-day="'+date+'" aria-label="'+escape(label)+'" aria-pressed="'+(date===selected)+'" '+
       (date===today?'aria-current="date" ':'')+(count?'class="has-events"':'')+'>'+number(day)+'</button>');
   }
   $('#days').innerHTML=cells.join('');
@@ -278,7 +307,7 @@ function calendar() {
   $('#regional').innerHTML=rows.filter(x=>x.source==='holiday').map(h=>holidayRow(h)).join('')||text('noDay');
   $('#sheet-title').textContent=$('#selected-title').textContent;
   $('#sheet-events').innerHTML=$('#selected').innerHTML;
-  $('#coverage').textContent=model.region==='IR'&&end>'2027-03-20'?text('coverage'):'';
+  $('#coverage').textContent=end>'2027-03-20'?text('coverage'):'';
 
 }
 function inbox() {
@@ -344,14 +373,14 @@ function scanAlerts() {
   if (commit(s=>collectAlerts(s,new Date(),dueAlerts)) && count!==model.inbox.length) inbox();
 }
 function moveMonth(delta) {
-  const sys=calendarSystem(),[y,m]=calendarParts(selected,sys);displayDate(monthStart(y,m+delta,sys));calendar();
+  const sys=calendarSystem(),[y,m]=calendarParts(selected,sys);const [nextYear,nextMonth]=calendarParts(monthStart(y,m+delta,sys),sys);jumpTo(nextYear,nextMonth);
 }
 const drawControls=appearanceControls(async prefs=>{
   lang=prefs.lang;appearance();sync();
   if(verified)try{await api('profile','POST',{prefs});}catch(e){announce(e.message);}
 });
 $('#calendar-system').onchange=e=>{localStorage.setItem('simagol.calendar',e.target.value);render();};
-$('#region').onchange=e=>{model.region=e.target.value;if(owner)commit(s=>({...s,region:e.target.value}));calendar();};
+$('#jump-month').onchange=$('#jump-year').onchange=()=>jumpTo(Number($('#jump-year').value),Number($('#jump-month').value));
 let activeView='calendar';
 let plannerReady=false;
 function displayView(){

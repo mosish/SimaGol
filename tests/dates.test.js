@@ -10,8 +10,8 @@ test('Iran resolves solar Hijri dates independently for each Gregorian year', ()
   assert.equal(holidayDate('ir-doctors', 2024), '2024-08-22');
   assert.equal(holidayDate('ir-doctors', 2025), '2025-08-23');
   const august = eventsInMonth({region:'IR',year:2025,month:8});
-  assert.ok(august.some(h=>h.id==='ir-doctors' && h.date==='2025-08-23'));
-  assert.equal(HOLIDAYS.filter(h => h.region === 'IR').length, 445);
+  assert.ok(!august.some(h=>h.id==='ir-doctors'));
+  assert.ok(august.some(h=>h.name.fa==='شهریورگان'));
   const events = [{ id: 'norooz', name: 'Send flowers', date: '2024-03-20', kind: 'occasion', holidayId: 'ir-nowruz' }];
   const alerts = dueAlerts({ events, timeZone:'Asia/Tehran', from:'2025-03-17T00:00Z', to:'2025-03-21T00:00Z' });
   assert.deepEqual(alerts.map(x => x.dueAt), ['2025-03-18T05:30:00.000Z','2025-03-20T05:30:00.000Z']);

@@ -51,10 +51,13 @@
     <p id="status" role="status" aria-live="polite"></p>
     <div class="planner-layout" data-view="calendar">
       <section class="sheet calendar" id="month" tabindex="-1" aria-labelledby="month-title">
-        <div class="section-top"><h2 id="month-title"></h2><div class="month-actions"><button id="previous"></button><button id="today" data-label="today"></button><button id="next"></button></div></div>
-        <div class="calendar-options"><label class="region-label"><span data-label="system"></span><select id="calendar-system"><option value="persian" data-label="solar"></option><option value="gregory" data-label="gregorian"></option></select></label>
-        <label class="region-label"><span data-label="region"></span><select id="region"><option value="IR" data-label="iran"></option><option value="US" data-label="us"></option></select></label>
-        </div><div id="weekdays" aria-hidden="true" class="weekdays"></div><div id="days" class="days"></div>
+        <div class="calendar-toolbar">
+          <h2 id="month-title" class="calendar-sr" aria-live="polite"></h2>
+          <div class="calendar-jump"><select id="jump-month" aria-label="ماه"></select><select id="jump-year" aria-label="سال"></select></div>
+          <fieldset id="calendar-system" aria-label="نوع تقویم"><label><input type="radio" name="system" value="persian"><span data-label="solar"></span></label><label><input type="radio" name="system" value="gregory"><span data-label="gregorian"></span></label></fieldset>
+          <div class="month-actions"><button id="previous"></button><button id="today" data-label="today"></button><button id="next"></button></div>
+        </div>
+        <div id="weekdays" aria-hidden="true" class="weekdays"></div><div id="days" class="days"></div>
       </section>
       <section class="sheet day-summary" aria-labelledby="selected-title"><h2 id="selected-title"></h2><div id="selected"></div></section>
       <details class="sheet regional-list"><summary data-label="regionalList"></summary><p id="coverage" class="hint"></p><div id="regional"></div></details>

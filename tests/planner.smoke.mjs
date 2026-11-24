@@ -29,7 +29,8 @@ try {
   await page.goto(origin+'/planner/');
   await page.locator('[data-day]').first().waitFor();
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
-  assert.equal(await page.locator('#region').inputValue(),'IR');
+  assert.equal(await page.locator('#region').count(),0);
+  assert.ok(await page.locator('#calendar-system [value=persian]').isChecked());
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),'mobile reflow');
   await page.locator('#language [value=en]').check();
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
@@ -47,7 +48,9 @@ try {
 
   const editor=page.locator('#event-form');
   const input=key=>editor.locator('[name="'+key+'"]');
-  await page.locator('.days .has-events').first().click();
+  await page.locator('#jump-year').selectOption('1405');
+  await page.locator('#jump-month').selectOption('1');
+  await page.locator('[data-day="2026-03-21"]').click();
   const choose=page.locator('#sheet-events [data-choose]').first();
   const chosen=await choose.getAttribute('data-choose');
   await choose.click();
@@ -62,7 +65,8 @@ try {
   await page.locator('#editor[open]').waitFor();
   assert.equal(await editor.getAttribute('data-holiday'),chosen.split('@')[0]);
   await page.locator('#cancel').click();
-  await page.locator('#calendar-system').selectOption('gregory');
+  await page.locator('#calendar-system [value=gregory]').check();
+  assert.equal(await page.locator('.days [aria-pressed=true]').getAttribute('data-day'),'2026-03-21');
   await page.locator('[data-tab=plus]').click();
   await input('type').selectOption('birthday');
   await input('name').fill('Birthday smoke');
@@ -81,13 +85,13 @@ try {
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
 
   await page.locator('.planner-views [href="#calendar"]').click();
-  await page.locator('#region').selectOption('US');
-  await page.locator('#previous').click();
-  await page.locator('[data-day="2028-05-14"]').click();
+  await page.locator('#jump-year').selectOption('2026');
+  await page.locator('#jump-month').selectOption('12');
+  await page.locator('[data-day="2026-12-23"]').click();
   await page.locator('#day-sheet[open]').waitFor();
-  const addMother=page.locator('#sheet-events [data-choose^="us-mothers@"]');
-  assert.equal(await addMother.textContent(),'+');
-  await addMother.click();
+  const addFather=page.locator('#sheet-events [data-choose^="ir-wv38c9@"]');
+  assert.equal(await addFather.textContent(),'+');
+  await addFather.click();
   assert.ok(await input('annual').isDisabled());
   assert.ok(await page.locator('#holiday-lead').isVisible());
   await editor.locator('[type=submit]').click();
@@ -95,12 +99,12 @@ try {
   await page.locator('#inbox').waitFor();
   assert.ok(!await entries.isVisible());
   await page.locator('.planner-views [href="#occasions"]').click();
-  await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
+  await entries.getByRole('heading',{name:"Father's Day"}).waitFor();
 
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded'});
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
-  assert.equal(await page.locator('#region').inputValue(),'US');
+  assert.ok(await page.locator('#calendar-system [value=gregory]').isChecked());
   await page.locator('.planner-views [href="#calendar"]').click();
   const nextDate=await page.locator('#month-title').textContent();
   await page.locator('#next').click();
@@ -110,7 +114,7 @@ try {
   await page.locator('#remove').click();
   await birthday.waitFor({state:'detached'});
   await page.reload({waitUntil:'domcontentloaded'});
-  await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
+  await entries.getByRole('heading',{name:"Father's Day"}).waitFor();
   assert.equal(await birthday.count(),0);
   await page.locator('[data-tab="home"]').click();
   await page.locator('[data-tab="home"][aria-current="page"]').waitFor();
@@ -120,7 +124,7 @@ try {
   await page.locator('#tab-page h2').waitFor();
   await page.locator('[data-tab="bell"]').click();
   await page.locator('.planner-views [href="#occasions"]').click();
-  await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
+  await entries.getByRole('heading',{name:"Father's Day"}).waitFor();
   await context.setOffline(false);
   await page.reload();
   await page.waitForFunction(async()=>(await (await fetch('/api/planner')).json()).entries.every(e=>e.name!=='Birthday smoke'));
