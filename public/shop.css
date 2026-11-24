@@ -1255,3 +1255,45 @@ html[dir=ltr] .profile-menu a svg:last-child {transform:rotate(180deg);}
   .preference-choice span { min-block-size: 40px; min-inline-size: 36px; }
 }
 .utilities { flex-wrap: wrap; }
+
+/* The garden is drawn in the switch so its sky and hills move with the thumb. */
+.theme-tools { display: inline-flex; align-items: center; gap: 3px; margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+.garden-switch { position: relative; display: grid; align-items: center; width: 83px; height: 44px; cursor: pointer; }
+.garden-switch input { position: absolute; z-index: 1; inset: 0; margin: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.garden-scene {
+  display: block; position: relative; overflow: hidden; height: 34px; border-radius: 24px;
+  background: #ffe0ba; box-shadow: inset 0 0 0 1px #6b455038, 0 2px 7px #724b5026;
+}
+.garden-scene svg { width: 100%; height: 100%; }
+.garden-far { fill: #f1b394; } .garden-mid { fill: #d28d97; } .garden-near { fill: #995f79; }
+.garden-stars { opacity: 0; } .garden-stems { stroke: #754861; } .garden-buds { fill: #fbd8cb; }
+.garden-orb {
+  position: absolute; left: 3px; top: 3px; width: 28px; height: 28px; border-radius: 50%;
+  background: #fff7cd; box-shadow: inset 0 0 0 3px #ffea97, 0 0 7px #ffd178;
+}
+.garden-orb::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; opacity: 0;
+  background: radial-gradient(circle at 31% 34%, #d5cee1 0 2px, transparent 2.4px),
+    radial-gradient(circle at 65% 60%, #ded7e7 0 3px, transparent 3.4px),
+    radial-gradient(circle at 38% 74%, #dfd8e7 0 1.4px, transparent 1.9px);
+}
+.garden-switch input:checked + .garden-scene { background: #544369; }
+.garden-switch input:checked + span .garden-stars { opacity: 1; }
+.garden-switch input:checked + span .garden-far { fill: #77618c; transform: translateX(-4px); }
+.garden-switch input:checked + span .garden-mid { fill: #59476e; transform: translateX(-7px); }
+.garden-switch input:checked + span .garden-near { fill: #3b304e; transform: translateX(-9px); }
+.garden-switch input:checked + span .garden-stems { stroke: #594660; }
+.garden-switch input:checked + span .garden-buds { fill: #b49db9; }
+.garden-switch input:checked + span .garden-orb { transform: translateX(49px); background: #f6f2fd; box-shadow: 0 0 6px #d6c8eb80; }
+.garden-switch input:checked + span .garden-orb::after { opacity: 1; }
+.theme-tools .theme-auto { display: grid; place-items: center; width: 32px; min-width: 32px; height: 34px; padding: 0; background: var(--surface); color: var(--muted); border: 1px solid var(--line); border-radius: 20px; }
+.theme-auto svg { width: 15px; height: 15px; }
+.theme-auto[aria-pressed=true] { background: var(--hero); color: var(--plum); border-color: var(--plum); }
+.garden-switch input:focus-visible + span { outline: 2px solid var(--plum); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .garden-scene, .garden-orb { transition: transform .56s cubic-bezier(.33,.06,.2,1), background-color .46s, box-shadow .46s; }
+  .garden-scene path, .garden-scene g, .garden-orb::after { transition: opacity .42s, fill .5s, stroke .5s, transform .56s cubic-bezier(.33,.06,.2,1); }
+}
+@media (forced-colors: active) {
+  .garden-scene { border: 1px solid ButtonText; } .garden-orb { background: ButtonText !important; }
+}

@@ -38,13 +38,13 @@ try {
   assert.equal(await page.locator('.product .pic').first().getAttribute('href'),'#product/lily');
   assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
   assert.equal(await page.locator('header #calendar').count(),0);
-  await page.locator('#theme [value=light]').check();
+  await page.getByRole('switch',{name:'حالت شب'}).uncheck();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
-  await page.locator('#theme [value=auto]').check();
-  assert.equal(await page.locator('#theme [value=auto]').getAttribute('aria-label'),'خودکار');
+  await page.locator('.theme-auto').click();
+  assert.equal(await page.locator('.theme-auto').getAttribute('aria-label'),'خودکار');
   await page.locator('#language [value=en]').check();
   await page.waitForFunction(()=>document.documentElement.lang==='en' && document.documentElement.dir==='ltr');
-  await page.locator('#theme [value=dark]').check();
+  await page.getByRole('switch',{name:'Night mode'}).check();
   await page.reload();
   await page.waitForFunction(()=>document.documentElement.classList.contains('dark'));
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
@@ -96,7 +96,7 @@ try {
   await page.locator('[data-tab="profile"]').click();
   await page.locator('.profile-menu').waitFor();
   for(const mode of ['light','dark']){
-    await page.locator('#theme [value='+mode+']').check();
+    await page.locator('#theme [role=switch]').setChecked(mode==='dark');
     const shared=await page.evaluate(()=>{
       const root=getComputedStyle(document.documentElement);
       const profile=getComputedStyle(document.querySelector('.profile-dashboard'));
