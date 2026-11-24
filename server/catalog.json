@@ -1,0 +1,32 @@
+{
+  "categories": [
+    {"id":"bouquet","name":{"fa":"دسته‌گل","en":"Bouquets"}},
+    {"id":"arrangement","name":{"fa":"گل‌آرایی","en":"Arrangements"}}
+  ],
+  "products": [
+    {
+      "id":"blush","category":"bouquet",
+      "name":{"fa":"رز مخملی","en":"Velvet Rose"},
+      "description":{"fa":"دسته‌گلی از رزهای خوش‌رنگ برای یک قرار دونفره یا یک غافلگیری ساده.","en":"A hand-tied gathering of roses for a dinner date or a just-because surprise."},
+      "priceIrr":18500000,"stock":6,"image":"images/roses.jpg"
+    },
+    {
+      "id":"sunrise","category":"bouquet",
+      "name":{"fa":"صبح لاله‌ها","en":"Morning Tulips"},
+      "description":{"fa":"لاله‌هایی با ساقه‌های بلند که در گلدان ساده هم زیبا می‌مانند.","en":"Long-stemmed tulips that look at home in a simple glass vase."},
+      "priceIrr":14900000,"stock":8,"image":"images/tulips.jpg"
+    },
+    {
+      "id":"meadow","category":"arrangement",
+      "name":{"fa":"باغ کوچک","en":"Little Meadow"},
+      "description":{"fa":"ترکیبی آزاد از گل‌های فصل، برای آوردن حال‌وهوای باغ به میز خانه.","en":"Seasonal stems arranged loosely to bring a little garden to the table."},
+      "priceIrr":16500000,"stock":4,"image":"images/meadow.jpg"
+    },
+    {
+      "id":"lily","category":"arrangement",
+      "name":{"fa":"نجوای لیلیوم","en":"Lily Whisper"},
+      "description":{"fa":"گل‌آرایی لیلیوم با ساقه‌های کشیده و شکوفه‌هایی چشمگیر.","en":"A sculptural arrangement of long lily stems and generous blooms."},
+      "priceIrr":21900000,"stock":3,"image":"images/lilies.jpg"
+    }
+  ]
+}
