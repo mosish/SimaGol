@@ -1,4 +1,8 @@
 {
+  "Customer greeting": {
+    "fa": "سلام {name} جان",
+    "en": "Hello, {name}"
+  },
   "Invalid email": {
     "fa": "نشانی ایمیل معتبر وارد کنید.",
     "en": "Invalid email"

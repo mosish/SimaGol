@@ -1,5 +1,6 @@
 import { HOLIDAYS, holidayDate, eventsInMonth, dueAlerts, localDate } from './dates.js';
 import { initDevice } from './device.js';
+import { renderGreeting } from '../components/greeting.js';
 import { newPlanner, loadPlanner, savePlanner, collectAlerts, removeEntry, upsert, validLink, validZone } from './store.js';
 
 const copy = {
@@ -84,6 +85,20 @@ const copy = {
 };
 const $ = selector => document.querySelector(selector);
 let lang = 'fa';
+let customerName = '';
+let profileRequest = 0;
+async function refreshGreeting() {
+  const request = ++profileRequest;
+  let name = '';
+  try {
+    const response = await fetch('/api/me', {cache:'no-store'});
+    if (response.ok) name = (await response.json())?.name || '';
+  } catch { /* Offline planners keep the guest wordmark. */ }
+  if (request === profileRequest) {
+    customerName = name;
+    renderGreeting($('.brand small'), customerName, lang);
+  }
+}
 let dark = false;
 let blocked = '';
 let model = newPlanner();
@@ -133,6 +148,7 @@ function displayDate(date) {
   [year,month]=date.split('-').map(Number);
 }
 function appearance() {
+  renderGreeting($('.brand small'), customerName, lang);
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';
   document.documentElement.classList.toggle('dark',dark);
@@ -320,9 +336,12 @@ window.addEventListener('storage',e=>{
 });
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)scanAlerts();});
 window.addEventListener('pageshow',scanAlerts);
+window.addEventListener('pageshow',event=>{if (event.persisted) refreshGreeting();});
+document.addEventListener('visibilitychange',()=>{if (!document.hidden) refreshGreeting();});
 navigator.serviceWorker?.addEventListener('message',event=>{if(event.data==='planner-reminder')scanAlerts();});
 setInterval(()=>{if(!document.hidden)scanAlerts();},30000);
 appearance();scanAlerts();
+refreshGreeting();
 if(blocked)announce(text(blocked));
 try {
   device=await initDevice({getSnapshot:snapshot,onMessage:announce,onChange:scanAlerts});

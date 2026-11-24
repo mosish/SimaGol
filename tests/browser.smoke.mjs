@@ -33,6 +33,7 @@ try {
   await page.locator('.product').first().waitFor();
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   assert.equal(await page.locator('.product').count(),4);
+  assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
   await page.locator('#language').click();
   await page.waitForFunction(()=>document.documentElement.lang==='en' && document.documentElement.dir==='ltr');
   await page.locator('#theme').click();
@@ -55,6 +56,13 @@ try {
   await registration.locator('[type=submit]').click();
   const checkout=page.locator('[data-form="checkout"]');
   await checkout.locator('[name=address]').fill('Sample address, Tehran');
+  assert.equal(await page.locator('.brand small').textContent(),'Hello, Test Buyer');
+  const planner=await page.context().newPage();
+  await planner.goto(origin+'/planner/');
+  await planner.waitForFunction(()=>document.querySelector('.brand small').textContent==='Hello, Test Buyer');
+  await planner.locator('#language').click();
+  assert.equal(await planner.locator('.brand small').textContent(),'سلام Test Buyer جان');
+  await planner.close();
   await checkout.locator('[name=phone]').fill('09123456789');
   await checkout.locator('[name=method]').selectOption('scheduled');
   await checkout.locator('[name=slot] option').first().waitFor({state:'attached'});
@@ -69,6 +77,7 @@ try {
   await page.locator('[data-logout]').click();
   const login=page.locator('[data-form="Login"]');
   await login.locator('[name=email]').fill('owner@example.test');
+  assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
   await login.locator('[name=password]').fill(staffPassword);
   await login.locator('[type=submit]').click();
   await page.locator('[data-logout]').waitFor();

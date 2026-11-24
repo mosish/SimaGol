@@ -102,6 +102,17 @@ header {
   letter-spacing:.15em;
 }
 
+.brand .personal-greeting {
+  font: inherit;
+  font-size: .85rem;
+  line-height: 1.6;
+  letter-spacing: normal;
+  max-inline-size: min(35vw, 18rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .seal,.tile,.icon,.close,.heart,.plus {
   display:grid;
   place-items:center;

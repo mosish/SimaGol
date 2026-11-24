@@ -1,5 +1,6 @@
 import { $, state, t, label, esc, num, persist, api, mascot, changeBag, selectedItems, stored } from './components/ui.js';
 import { icon } from './components/icons.js';
+import { renderGreeting } from './components/greeting.js';
 import { collection, product, bagView } from './components/store.js';
 import { account, checkout, checkoutFields, invoice, orderCard, notificationList } from './components/account.js';
 import { showHomepage } from './components/home.js';
@@ -21,6 +22,7 @@ function notify(message) {
 function appearance() {
   document.documentElement.lang=state.lang;
   document.documentElement.dir=state.lang==='fa'?'rtl':'ltr';
+  renderGreeting($('.brand small'), state.me?.name, state.lang, t('Customer greeting'));
   document.documentElement.classList.toggle('dark',state.dark);
   document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
   document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));

@@ -5,7 +5,7 @@ const assets = [
   shell, '/planner/index.html', '/planner/manifest.json', '/planner/planner.css',
   '/planner/app.js', '/planner/store.js', '/planner/dates.js', '/planner/device.js',
   '/planner/images/icon-192.png', '/planner/images/icon-512.png', '/planner/images/apple-touch.png',
-  '/shop.css', '/images/meadow.jpg',
+  '/shop.css', '/components/greeting.js', '/images/meadow.jpg',
 ];
 const cachedPaths = new Set(assets);
 
