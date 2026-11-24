@@ -70,7 +70,7 @@ try {
   await page.locator('[data-tab=plus]').click();
   for(const type of ['anniversary','custom','birthday']){
     await page.locator('[data-quick="'+type+'"]').click();
-    assert.equal(await input('type').inputValue(),type);
+    assert.equal(await editor.locator('[name=type]:checked').inputValue(),type);
     assert.ok(await page.locator('#editor').isVisible());
     if(type!=='birthday'){
       await page.locator('#cancel').click();
@@ -79,15 +79,27 @@ try {
   }
   await input('name').fill('Birthday smoke');
   await input('date').fill('2028-06-11');
+  assert.ok(!await input('notes').isVisible());
+  await editor.locator('[value=occasion]').check();
+  assert.ok(await page.locator('#holiday-lead').isVisible());
+  await editor.locator('[value=birthday]').check();
+  assert.ok(await input('daysBefore').isEnabled());
+  await editor.locator('#event-more summary').click();
   await input('recipient').fill('Gift recipient');
   await input('daysBefore').fill('5');
   await input('annual').check();
   await input('notes').fill('Choose tulips');
+  await input('link').fill('https://example.test/flowers');
+  await editor.locator('#event-more summary').click();
   await editor.locator('[type=submit]').click();
   const entries=page.locator('#entries');
   const birthday=entries.locator('.event-row').filter({hasText:'Birthday smoke'});
   await birthday.waitFor();
   await birthday.locator('[data-edit]').click();
+  assert.ok(!await input('notes').isVisible());
+  await editor.locator('#event-more summary').click();
+  assert.equal(await input('notes').inputValue(),'Choose tulips');
+  assert.equal(await input('link').inputValue(),'https://example.test/flowers');
   await input('notes').fill('Choose roses');
   await editor.locator('[type=submit]').click();
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
@@ -100,6 +112,8 @@ try {
   const addFather=page.locator('#sheet-events [data-choose^="ir-wv38c9@"]');
   assert.equal(await addFather.textContent(),'+');
   await addFather.click();
+  assert.ok(await editor.locator('[value=occasion]').isChecked());
+  assert.ok(await editor.locator('[value=birthday]').isDisabled());
   assert.ok(await input('annual').isDisabled());
   assert.ok(await page.locator('#holiday-lead').isVisible());
   await editor.locator('[type=submit]').click();
@@ -140,7 +154,7 @@ try {
   await page.locator('[data-tab=plus]').click();
   await page.locator('[data-quick=custom]').click();
   await page.locator('#editor[open]').waitFor();
-  assert.equal(await input('type').inputValue(),'custom');
+  assert.equal(await editor.locator('[name=type]:checked').inputValue(),'custom');
   assert.equal(await editor.getAttribute('data-holiday'),'');
   const guest=await browser.newPage();
   await guest.goto(origin);
@@ -152,7 +166,7 @@ try {
   await login.locator('[name=password]').fill('test-only-flower-planner');
   await login.locator('[type=submit]').click();
   await guest.locator('#editor[open]').waitFor();
-  assert.equal(await guest.locator('#event-form [name=type]').inputValue(),'anniversary');
+  assert.equal(await guest.locator('#event-form [name=type]:checked').inputValue(),'anniversary');
   await guest.close();
   assert.deepEqual(pageErrors,[]);
   console.log('Mobile Chromium verified planner CRUD, Solar/Gregorian selection and authenticated saves, standalone manifest, offline reload and offline edits.');

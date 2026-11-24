@@ -1,5 +1,6 @@
 import {appearanceControls,accountTheme} from '../components/appearance.js';
 import {api} from '../components/ui.js';
+import {icon} from '../components/icons.js';
 import {calendarSystem,dateLocale,calendarParts,monthStart,monthLength,addDays,inputDate,readDate} from '../components/calendar.js';
 import { HOLIDAYS, eventsInMonth, dueAlerts, localDate } from './dates.js';
 import { initDevice } from './device.js';
@@ -8,6 +9,7 @@ import { renderNavigation } from '../components/navigation.js';
 import { newPlanner, loadPlanner, savePlanner, collectAlerts, removeEntry, upsert, validLink, validZone } from './store.js';
 
 const copy = {
+  moreOptions:['موارد دیگر','More options'], customShort:['دلخواه','Custom'], flowerShort:['سفارش گل','Flowers'],
   calendarView:['تقویم','Calendar'],
   addReminder:['افزودن یادآوری','Add reminder'],
 
@@ -17,10 +19,10 @@ const copy = {
   pendingSync:['تغییرات آفلاین در این مرورگر محفوظ است؛ همگام‌سازی کامل نشد.','Offline changes are saved on this device. Sync is pending.'],
   smsSetup:['ارسال پیامک پس از اتصال سرویس پیامکی فروشگاه فعال می‌شود.','SMS delivery becomes available once the shop connects its SMS service.'],
   system:['نوع تقویم','Calendar system'],solar:['شمسی','Solar Hijri'],gregorian:['میلادی','Gregorian'],
-  solarDate:['تاریخ شمسی (سال/ماه/روز)','Solar Hijri date (YYYY/MM/DD)'],worldDate:['تاریخ میلادی (سال/ماه/روز)','Gregorian date (YYYY/MM/DD)'],
+  solarDate:['تاریخ شمسی','Solar Hijri date'],worldDate:['تاریخ میلادی','Gregorian date'],
   signIn:['ورود یا ثبت‌نام برای ثبت مناسبت','Sign in or register to save an occasion'],
   online:['برای ذخیره به اینترنت وصل شوید.','Connect to save changes.'],
-  smsOption:['یادآوری پیامکی برای این مناسبت','Send me SMS reminders for this occasion'],
+  smsOption:['یادآوری پیامکی','SMS reminder'],
   smsTitle:['یادآوری با پیامک','SMS reminders'],mobile:['شماره همراه خودت','Your mobile number'],
   sendCode:['ارسال کد تأیید','Send verification code'],code:['کد تأیید','Verification code'],verify:['تأیید شماره','Verify number'],
   coverage:['مناسبت‌های قمری ایران تا پایان ۱۴۰۵ تطبیق داده شده‌اند.','Iranian lunar observances are confirmed through 1405.'],
@@ -57,7 +59,7 @@ const copy = {
   date: ["تاریخ میلادی","Date (Gregorian)"],
   annual: ["تکرار هر سال","Repeat yearly"],
   recipient: ["گیرنده (اختیاری)","Recipient (optional)"],
-  lead: ["چند روز پیش از مناسبت؟","Days before the occasion"],
+  lead: ["یادآوری (روز قبل)","Reminder (days before)"],
   holidayLead: ["برای این مناسبت، ۳ روز و ۱ روز زودتر یادآوری می‌شود.","You’ll receive reminders 3 days and 1 day before this occasion."],
   notes: ["یادداشت (اختیاری)","Note (optional)"],
   link: ["پیوند (اختیاری)","Link (optional)"],
@@ -326,6 +328,11 @@ function render() {
 }
 const form=$('#event-form');
 const field=name=>form.elements.namedItem(name);
+for(const slot of form.querySelectorAll('[data-kind-icon]'))slot.innerHTML=icon(slot.dataset.kindIcon);
+const more=$('#event-more');
+form.addEventListener('invalid',event=>{
+  if(more.contains(event.target))more.open=true;
+},true);
 function configureReminder() {
   const occasion = field('type').value==='occasion';
   field('daysBefore').disabled=occasion;
@@ -343,9 +350,10 @@ function openEditor(entry,holiday,quickType) {
   form.reset();
   const rule=holiday || HOLIDAYS.find(h=>h.id===entry?.holidayId);
   form.dataset.holiday=rule?.id||'';
-  $('#form-title').textContent=text(entry?'editDate':'newDate')+(quickType?' · '+text(quickType):'');
+  $('#form-title').textContent=text(entry?'editDate':'newDate');
   field('type').value=rule || entry?.kind==='occasion' ? 'occasion' : entry?.type || quickType || 'birthday';
-  field('type').disabled=!!rule;
+  $('#event-kind').disabled=!!rule;
+  more.open=false;
   field('name').value=entry?.name || (rule?title(rule):'');
   field('date').value=inputDate(entry?.date||holiday?.date||selected);
   field('date').placeholder=calendarSystem()==='persian'?'1405/01/01':'2026/03/21';
@@ -358,7 +366,8 @@ function openEditor(entry,holiday,quickType) {
   for(const key of ['recipient','notes','link'])field(key).value=entry?.[key]||'';
   $('#form-error').textContent='';
   configureReminder();
-  $('#editor').showModal();field('name').focus();
+  $('#editor').showModal();
+  (matchMedia('(pointer: coarse)').matches?$('#form-title'):field('name')).focus({preventScroll:true});
 }
 function scanAlerts() {
   if (blocked || !owner || cachedViewer()!==owner) return;
@@ -414,7 +423,7 @@ $('#keep').onclick=()=>$('#confirm').close();
 $('#today').onclick=()=>{displayDate(localDate(new Date(),model.timeZone));calendar();};
 $('#previous').onclick=()=>moveMonth(-1);
 $('#next').onclick=()=>moveMonth(1);
-field('type').onchange=configureReminder;
+$('#event-kind').onchange=configureReminder;
 $('#remove').onclick=async()=>{
   if(!await mutation('delete',{id:deleteTarget}))return;
   if(commit(s=>removeEntry(s,deleteTarget))){
@@ -449,7 +458,7 @@ form.onsubmit=async e=>{
     notes:field('notes').value.trim(),link:field('link').value.trim()
   };
   if(rule) {entry.holidayId=rule.id;entry.region=rule.region;}
-  if(!validLink(entry.link)) {$('#form-error').textContent=text('invalidLink');return;}
+  if(!validLink(entry.link)) {more.open=true;field('link').focus();$('#form-error').textContent=text('invalidLink');return;}
   if(!entry.name) {$('#form-error').textContent=text('invalid');return;}
   if(!entry.date){$('#form-error').textContent=text('invalid');return;}
   if(rule){const prior=model.entries.find(x=>x.holidayId===rule.id);if(prior)entry.id=prior.id;}

@@ -43,7 +43,45 @@ select, #prefs input { font: inherit; color: var(--text); background: var(--bg);
 #prefs label, #prefs input { min-width: 0; max-width: 100%; }
 #status:not(:empty), #form-error:not(:empty) { padding: .8rem; background: var(--hero); border-radius: 10px; }
 #unread:not(:empty) { border-radius: 20px; background: var(--hero); padding: .15rem .65rem; }
-#editor { width: min(520px, 95vw); }
+#editor {
+  width: min(26rem, calc(100% - 24px));
+  max-height: min(90dvh, 44rem);
+  padding: clamp(14px, 3vw, 20px);
+  border-radius: 20px;
+}
+#editor #event-form { padding: 0; gap: 10px; }
+.editor-heading { display: flex; align-items: center; justify-content: space-between; }
+#editor h2 { margin: 0; font-family: inherit; font-size: 1.12rem; }
+#cancel { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 50%; color: var(--muted); background: var(--bg); font-size: 1.3rem; }
+#event-kind { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); margin: 0; padding: 3px; min-width: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); }
+#event-kind label { position: relative; cursor: pointer; }
+#event-kind input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
+#event-kind label > span { display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 46px; padding: 3px 0; color: var(--muted); border: 1px solid transparent; border-radius: 12px; }
+#event-kind svg { width: 18px; height: 18px; }
+#event-kind b { font-size: .76rem; font-weight: 500; }
+#event-kind input:checked + span { background: var(--hero); color: var(--plum); border-color: var(--plum); box-shadow: var(--shadow); }
+#event-kind input:checked + span b { font-weight: 700; }
+#event-kind input:focus-visible + span { outline: 2px solid var(--plum); outline-offset: 1px; }
+#event-kind:disabled label { cursor: default; }
+#event-form label:not(:has([type=radio], [type=checkbox])) { display: grid; gap: 3px; font-size: .83rem; min-width: 0; color: var(--muted); }
+#editor #event-form :is(input:not([type=radio],[type=checkbox]), textarea) { padding: 7px 10px; font-size: 1rem; border-color: var(--line); }
+#event-form textarea { min-height: 54px; }
+.event-timing { display: grid; grid-template-columns: 1.15fr 1fr; gap: 10px; }
+.event-timing:has([hidden]) { grid-template-columns: 1fr; }
+.event-switches { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; }
+#event-form .event-switches label { cursor: pointer; font-size: .85rem; gap: 7px; }
+#event-form input[type=checkbox] { appearance: none; position: relative; margin: 0; width: 32px; height: 19px; border: 1px solid var(--muted); border-radius: 20px; background: var(--bg); cursor: inherit; }
+#event-form input[type=checkbox]::after { content: ''; position: absolute; top: 3px; inset-inline-start: 3px; width: 11px; height: 11px; border-radius: 50%; background: var(--muted); }
+#event-form input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+#event-form input[type=checkbox]:checked::after { inset-inline-start: auto; inset-inline-end: 3px; background: white; }
+#event-form input:disabled { cursor: default; }
+#event-form #event-more { margin: 0; padding: 0 2px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+#event-more > summary { padding: 8px 0 3px; color: var(--plum); font-size: .84rem; }
+#event-more > div { display: grid; gap: 8px; }
+#event-form .cta { justify-self: stretch; }
+#holiday-lead, #form-error { margin: 0; }
+#form-error:empty { display: none; }
+@media (forced-colors: active) { #event-form input[type=checkbox] { appearance: auto; } #event-form input[type=checkbox]::after { display: none; } }
 #inbox, #entries { max-height: 33rem; overflow: auto; }
 @media (max-width: 760px) {
   .planner-layout { grid-template-columns: 1fr; gap: 0; }

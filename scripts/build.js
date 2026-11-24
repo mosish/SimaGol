@@ -20,7 +20,7 @@ for(const path of files(staging)){
 }
 const version=digest.digest('hex').slice(0,16);
 const worker=join(staging,'public','planner','sw.js');
-writeFileSync(worker,readFileSync(worker,'utf8').replace('simagol-planner-shell-v12','simagol-planner-'+version));
+writeFileSync(worker,readFileSync(worker,'utf8').replace('simagol-planner-shell-v13','simagol-planner-'+version));
 const release=join(releaseRoot,'simagol-'+version);
 if(!existsSync(release)) renameSync(staging,release);
 else {

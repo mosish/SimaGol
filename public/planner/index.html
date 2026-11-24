@@ -74,18 +74,29 @@
   </main>
   <nav class="app-tabs"></nav>
   <dialog id="day-sheet" aria-labelledby="sheet-title"><div class="section-top"><h2 id="sheet-title"></h2><button type="button" class="minor" id="close-day" data-label="close"></button></div><div id="sheet-events"></div></dialog>
-  <dialog id="editor"><form id="event-form">
-    <div class="section-top"><h2 id="form-title"></h2><button type="button" id="cancel" class="minor" data-label="close"></button></div>
-    <label><span data-label="kind"></span><select name="type"><option value="birthday" data-label="birthday"></option><option value="anniversary" data-label="anniversary"></option><option value="custom" data-label="custom"></option><option value="occasion" data-label="flowerOccasion"></option></select></label>
+  <dialog id="editor" aria-labelledby="form-title"><form id="event-form">
+    <div class="editor-heading"><h2 id="form-title" tabindex="-1"></h2><button type="button" id="cancel"><span aria-hidden="true">×</span><span class="calendar-sr" data-label="close"></span></button></div>
+    <fieldset id="event-kind"><legend class="calendar-sr" data-label="kind"></legend>
+      <label><input type="radio" name="type" value="birthday"><span><i data-kind-icon="birthday"></i><b data-label="birthday"></b></span></label>
+      <label><input type="radio" name="type" value="anniversary"><span><i data-kind-icon="anniversary"></i><b data-label="anniversary"></b></span></label>
+      <label><input type="radio" name="type" value="custom"><span><i data-kind-icon="custom"></i><b data-label="customShort"></b></span></label>
+      <label><input type="radio" name="type" value="occasion"><span><i data-kind-icon="bouquet"></i><b data-label="flowerShort"></b></span></label>
+    </fieldset>
     <label><span data-label="name"></span><input name="name" required maxlength="120" autocomplete="off"></label>
-    <label><span data-label="date"></span><input name="date" type="text" dir="ltr" required maxlength="10" placeholder="1405/01/01"></label>
-    <label><input type="checkbox" name="annual"><span data-label="annual"></span></label>
-    <label><span data-label="recipient"></span><input name="recipient" maxlength="140"></label>
-    <label><span data-label="lead"></span><input name="daysBefore" type="number" min="0" max="365" step="1" required></label>
+    <div class="event-timing">
+      <label><span data-label="date"></span><input name="date" type="text" dir="ltr" required maxlength="10" placeholder="1405/01/01"></label>
+      <label><span data-label="lead"></span><input name="daysBefore" type="number" min="0" max="365" step="1" required></label>
+    </div>
     <p id="holiday-lead" class="hint" hidden data-label="holidayLead"></p>
-    <label id="sms-option" hidden><input type="checkbox" name="sms"><span data-label="smsOption"></span></label>
-    <label><span data-label="notes"></span><textarea name="notes" maxlength="1000"></textarea></label>
-    <label><span data-label="link"></span><input name="link" type="url" maxlength="2048" placeholder="https://" dir="ltr"></label>
+    <div class="event-switches">
+      <label><input type="checkbox" name="annual" role="switch"><span data-label="annual"></span></label>
+      <label id="sms-option" hidden><input type="checkbox" name="sms" role="switch"><span data-label="smsOption"></span></label>
+    </div>
+    <details id="event-more"><summary data-label="moreOptions"></summary><div>
+      <label><span data-label="recipient"></span><input name="recipient" maxlength="140"></label>
+      <label><span data-label="notes"></span><textarea name="notes" rows="2" maxlength="1000"></textarea></label>
+      <label><span data-label="link"></span><input name="link" type="url" maxlength="2048" placeholder="https://" dir="ltr"></label>
+    </div></details>
     <p id="form-error" role="alert"></p><button class="cta" type="submit" data-label="save"></button>
   </form></dialog>
   <dialog id="confirm"><h2 data-label="deleteTitle"></h2><p id="delete-name"></p><div class="actions"><button class="minor" id="keep" data-label="cancel"></button><button class="cta" id="remove" data-label="delete"></button></div></dialog>
