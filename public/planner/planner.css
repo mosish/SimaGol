@@ -36,6 +36,22 @@ select, #prefs input { font: inherit; color: var(--text); background: var(--bg);
 .calendar h3 { margin-block: 1.5rem .5rem; }
 .event-row { padding-block: .75rem; border-block-start: 1px solid var(--line); overflow-wrap: anywhere; }
 .event-row h4, .event-row p { margin: 0; }
+#entries {display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr));gap:12px;}
+.occasion-tile {display:flex;flex-direction:column;gap:.6rem;min-width:0;padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:16px;}
+.tile-head {display:flex;align-items:center;gap:10px;}
+.tile-head time {flex:none;display:grid;place-items:center;min-width:3rem;padding:4px 6px;border-radius:12px;background:var(--hero);color:var(--plum);font-size:.76rem;line-height:1.45;}
+.tile-head time strong {font-size:1.18rem;}
+.tile-channel {display:flex;align-items:center;gap:5px;margin-block-start:auto;color:var(--muted);}
+.tile-channel svg {width:15px;height:15px;}
+.occasion-tile .row-actions {display:flex;flex-wrap:wrap;gap:6px;}
+#saved .section-top {flex-wrap:wrap;gap:.4rem 1rem;margin-block-end:.8rem;}
+#sms-usage,#sms-limit-note {color:var(--muted);}
+@media (min-width:380px) and (max-width:620px) {
+  #entries {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .occasion-tile {padding:10px;}
+  .tile-head {align-items:flex-start;flex-direction:column;gap:6px;}
+  .occasion-tile .row-actions button {padding-inline:8px;}
+}
 .event-row .row-actions { margin-block-start: .4rem; }
 .hint, .meta { color: var(--muted); font-size: .92rem; }
 .preferences { margin-block-end: 2rem; }

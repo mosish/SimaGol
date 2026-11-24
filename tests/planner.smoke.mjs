@@ -132,6 +132,11 @@ try {
   assert.ok(!await entries.isVisible());
   await page.locator('.planner-views [href="#occasions"]').click();
   await entries.getByRole('heading',{name:"Father's Day"}).waitFor();
+  const tiles=entries.locator('.occasion-tile');
+  const [firstTile,secondTile]=await Promise.all([tiles.nth(0).boundingBox(),tiles.nth(1).boundingBox()]);
+  assert.ok(Math.abs(firstTile.y-secondTile.y)<1 && firstTile.x!==secondTile.x);
+  assert.ok(await tiles.first().locator('time[datetime]').isVisible());
+  assert.ok(await page.locator('#sms-usage').isVisible());
 
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded'});

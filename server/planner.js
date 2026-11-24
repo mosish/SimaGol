@@ -1,5 +1,6 @@
 import {randomInt,randomBytes,scryptSync,timingSafeEqual} from 'node:crypto';
-import {validEntry,validZone} from '../public/planner/store.js';
+import {validEntry,validZone,smsOccasionLimit} from '../public/planner/store.js';
+import {transaction} from './db.js';
 import {dueAlerts,HOLIDAYS} from '../public/planner/dates.js';
 
 const ids=new Set(HOLIDAYS.map(h=>h.id));
@@ -9,7 +10,13 @@ export function initPlanner(db){
   db.exec(`CREATE TABLE IF NOT EXISTS planner_events(owner TEXT REFERENCES users(id) ON DELETE CASCADE,id TEXT,entry TEXT NOT NULL,updated INTEGER NOT NULL,PRIMARY KEY(owner,id));
   CREATE TABLE IF NOT EXISTS planner_contact(owner TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, phone TEXT, pending TEXT, challenge TEXT, expires INTEGER, attempts INTEGER DEFAULT 0, lastCode INTEGER DEFAULT 0, time TEXT DEFAULT '09:00', zone TEXT DEFAULT 'Asia/Tehran');
   CREATE TABLE IF NOT EXISTS sms_attempts(owner TEXT,phone TEXT,at INTEGER);
-  CREATE TABLE IF NOT EXISTS planner_sms_sent(owner TEXT,occurrence TEXT,at INTEGER,state TEXT,PRIMARY KEY(owner,occurrence));`);
+  CREATE TABLE IF NOT EXISTS planner_sms_sent(owner TEXT,occurrence TEXT,at INTEGER,state TEXT,PRIMARY KEY(owner,occurrence));
+  CREATE INDEX IF NOT EXISTS planner_sms_owner ON planner_events(owner,id) WHERE json_extract(entry,'$.sms')=1;
+  WITH ranked AS (
+    SELECT rowid AS rid, row_number() OVER(PARTITION BY owner ORDER BY updated DESC,id) AS rank
+    FROM planner_events WHERE json_extract(entry,'$.sms')=1
+  ) UPDATE planner_events SET entry=json_set(entry,'$.sms',json('false'))
+    WHERE rowid IN (SELECT rid FROM ranked WHERE rank>${smsOccasionLimit});`);
 }
 export function smsProvider(env=process.env){
   if(!env.KAVENEGAR_API_KEY||!env.SMS_OTP_TEMPLATE||!env.SMS_REMINDER_TEMPLATE)return null;
@@ -40,9 +47,14 @@ export async function changePlanner(db,user,action,b,sms,now=Date.now()){
        (e.sms!==undefined&&typeof e.sms!=='boolean')||
        ['recipient','notes','link'].some(k=>typeof (e[k]??'')!=='string'||(e[k]||'').length>(k==='notes'?1000:k==='link'?2048:140)))fail(400,'Invalid reminder');
     if(e.sms&&(!c.phone||!sms))fail(409,'Verify a mobile number first');
-    if(!db.prepare('SELECT 1 FROM planner_events WHERE owner=? AND id=?').get(user,e.id)&&entries(db,user).length>=250)fail(409,'Reminder limit reached');
-    if(typeof b.zone==='string' && validZone(b.zone) && /^([01]\d|2[0-3]):[0-5]\d$/.test(b.time))db.prepare('UPDATE planner_contact SET time=?,zone=? WHERE owner=?').run(b.time,b.zone,user);
-    db.prepare('INSERT INTO planner_events VALUES(?,?,?,?) ON CONFLICT(owner,id) DO UPDATE SET entry=excluded.entry,updated=excluded.updated').run(user,e.id,JSON.stringify(e),now);
+    transaction(db,()=>{
+      if(e.sms){
+        const {used}=db.prepare("SELECT count(*) AS used FROM planner_events WHERE owner=? AND id<>? AND json_extract(entry,'$.sms')=1").get(user,e.id);
+        if(used>=smsOccasionLimit)fail(409,'SMS occasion limit reached');
+      }
+      if(typeof b.zone==='string' && validZone(b.zone) && /^([01]\d|2[0-3]):[0-5]\d$/.test(b.time))db.prepare('UPDATE planner_contact SET time=?,zone=? WHERE owner=?').run(b.time,b.zone,user);
+      db.prepare('INSERT INTO planner_events VALUES(?,?,?,?) ON CONFLICT(owner,id) DO UPDATE SET entry=excluded.entry,updated=excluded.updated').run(user,e.id,JSON.stringify(e),now);
+    });
   }else if(action==='delete'){
     if(typeof b.id!=='string')fail(400,'Invalid reminder');db.prepare('DELETE FROM planner_events WHERE owner=? AND id=?').run(user,b.id);
   }else if(action==='settings'){

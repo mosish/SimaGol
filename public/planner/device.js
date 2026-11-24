@@ -4,13 +4,6 @@ function applicationKey(value) {
   return Uint8Array.from(raw,c=>c.charCodeAt(0));
 }
 
-// Project only scheduling data. Personal names, notes and florist URLs stay local.
-export function scheduleForPush(snapshot) {
-  const events=snapshot.entries.map(({id,kind,date,annual,daysBefore,holidayId,calendar})=>({
-    id,kind,date,annual,daysBefore,...(calendar?{calendar}:{}),...(holidayId?{holidayId}:{})
-  }));
-  return {timeZone:snapshot.timeZone,time:snapshot.time,events};
-}
 async function request(action,body) {
   const response=await fetch('/api/push/'+action,{
     method:body?'POST':'GET', credentials:'same-origin',cache:'no-store',
@@ -39,7 +32,8 @@ export async function initDevice({getSnapshot,onMessage}) {
       'Push scheduling has not synced. Your dates are saved locally. Reopen online to retry.');
   async function syncNow(){
     if(!subscription || !navigator.onLine || getSnapshot().authenticated===false)return;
-    await request('sync',{endpoint:subscription.endpoint,...scheduleForPush(getSnapshot())});
+    const {timeZone,time}=getSnapshot();
+    await request('sync',{endpoint:subscription.endpoint,source:'account',timeZone,time});
   }
   function sync(){
     queue=queue.then(syncNow).catch(report);

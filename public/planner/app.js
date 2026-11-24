@@ -6,9 +6,12 @@ import { HOLIDAYS, eventsInMonth, dueAlerts, localDate } from './dates.js';
 import { initDevice } from './device.js';
 import { renderGreeting } from '../components/greeting.js';
 import { renderNavigation } from '../components/navigation.js';
-import { newPlanner, loadPlanner, savePlanner, collectAlerts, removeEntry, upsert, validLink, validZone } from './store.js';
+import { newPlanner, loadPlanner, savePlanner, collectAlerts, removeEntry, upsert, validLink, validZone, smsOccasionLimit } from './store.js';
 
 const copy = {
+  smsUsage:['مناسبت پیامکی: {used} از {limit}','SMS occasions: {used} of {limit}'],
+  smsFull:['ظرفیت پیامک پر است. می‌توانی مناسبت را فقط با یادآوری ذخیره کنی یا پیامک یک مناسبت دیگر را خاموش کنی.','SMS slots are full. Save with a reminder only, or turn off SMS for another occasion.'],
+  alarmOnly:['فقط یادآوری','Reminder only'], withSms:['یادآوری و پیامک','Reminder + SMS'],
   moreOptions:['موارد دیگر','More options'], customShort:['دلخواه','Custom'], flowerShort:['سفارش گل','Flowers'],
   calendarView:['تقویم','Calendar'],
   addReminder:['افزودن یادآوری','Add reminder'],
@@ -168,7 +171,11 @@ async function mutation(action,body){
   try{if(!navigator.onLine)throw Error(text('online'));const info=await remote(action,body);if(owner!==id||cachedViewer()!==id)return null;
     model.entries=info.entries;phone=info.verifiedPhone;smsAvailable=info.smsAvailable;
     savePlanner(localStorage,model,owner);return info;
-  }catch(e){announce(e.message);return null;}
+  }catch(e){
+    if(e.message==='SMS occasion limit reached'){await refreshGreeting();announce(text('smsFull'));}
+    else announce(e.message);
+    return null;
+  }
 }
 let blocked = '';
 let model = newPlanner();
@@ -249,6 +256,17 @@ function eventRow(entry) {
     (entry.link && validLink(entry.link)?'<a href="'+escape(entry.link)+'" target="_blank" rel="noopener noreferrer">'+text('openLink')+'</a>':'');
   return row(title(entry),meta,actions,entry.notes?'<p>'+escape(entry.notes)+'</p>':'');
 }
+function occasionTile(entry) {
+  const kind=text(entry.kind==='occasion'?'flowerOccasion':entry.type);
+  return '<article class="event-row occasion-tile"><div class="tile-head"><time datetime="'+escape(entry.date)+'">'+
+    '<strong>'+escape(dateText(entry.date,{day:'numeric'}))+'</strong>'+escape(dateText(entry.date,{month:'short'}))+'</time>'+
+    '<div><h4>'+escape(title(entry))+'</h4><p class="meta">'+escape([kind,dateText(entry.date,{year:'numeric'}),entry.annual?text('yearly'):''].filter(Boolean).join(' · '))+'</p></div></div>'+
+    (entry.recipient?'<p>'+escape(text('recipient'))+' · '+escape(entry.recipient)+'</p>':'')+
+    (entry.notes?'<p>'+escape(entry.notes)+'</p>':'')+
+    '<small class="tile-channel">'+icon('bell')+escape(text(entry.sms?'withSms':'alarmOnly'))+'</small>'+
+    '<div class="row-actions">'+button('edit',entry.id,'edit')+button('delete',entry.id,'delete')+
+    (entry.link && validLink(entry.link)?'<a href="'+escape(entry.link)+'" target="_blank" rel="noopener noreferrer">'+text('openLink')+'</a>':'')+'</div></article>';
+}
 function holidayRow(h,includeDate=true) {
   const existing=model.entries.find(x=>x.holidayId===h.id);
   const action=existing?'edit':'choose';
@@ -327,7 +345,9 @@ function inbox() {
 }
 function render() {
   calendar(); inbox();
-  $('#entries').innerHTML=[...model.entries].sort((a,b)=>a.date.localeCompare(b.date)).map(eventRow).join('')||
+  const used=model.entries.filter(e=>e.sms).length;
+  $('#sms-usage').textContent=owner?text('smsUsage').replace('{used}',number(used)).replace('{limit}',number(smsOccasionLimit)):'';
+  $('#entries').innerHTML=[...model.entries].sort((a,b)=>a.date.localeCompare(b.date)).map(occasionTile).join('')||
     '<p class="hint">'+text('empty')+'</p>';
 }
 const form=$('#event-form');
@@ -363,6 +383,9 @@ function openEditor(entry,holiday,quickType) {
   field('date').placeholder=calendarSystem()==='persian'?'1405/01/01':'2026/03/21';
   field('date').previousElementSibling.textContent=text(calendarSystem()==='persian'?'solarDate':'worldDate');
   field('sms').checked=!!entry?.sms;
+  const full=!entry?.sms && model.entries.filter(e=>e.sms).length>=smsOccasionLimit;
+  field('sms').disabled=full;
+  $('#sms-limit-note').hidden=!full||!smsAvailable||!phone;
   field('date').disabled=!!rule;
   field('annual').checked=entry?.annual ?? true;
   field('annual').disabled=!!rule;

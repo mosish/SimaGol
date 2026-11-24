@@ -37,7 +37,7 @@ function endpointOf(value) {
 }
 
 function schedule(body) {
-  if (!Array.isArray(body.events) || body.events.length>250 || typeof body.timeZone!=='string' ||
+  if (!Array.isArray(body.events) || typeof body.timeZone!=='string' ||
       body.timeZone.length>80 || !/^([01]\d|2[0-3]):[0-5]\d$/.test(body.time)) fail();
   try {new Intl.DateTimeFormat('en',{timeZone:body.timeZone});} catch {fail();}
   const seen=new Set();
@@ -69,8 +69,12 @@ export function initPush(db) {
 }
 
 export function syncPush(db,userId,body,now=Date.now()) {
-  const endpoint=endpointOf(body.endpoint), json=schedule(body);
+  const endpoint=endpointOf(body.endpoint);
   return transaction(db,()=>{
+    const events=body.source==='account'
+      ? db.prepare('SELECT entry FROM planner_events WHERE owner=? ORDER BY id').all(userId).map(r=>JSON.parse(r.entry))
+      : body.events;
+    const json=schedule({...body,events});
     const existing=db.prepare('SELECT owner,schedule FROM planner_push WHERE endpoint=?').get(endpoint);
     if (existing && existing.owner!==userId) fail(409,'Device belongs to another account');
     if (!existing && db.prepare('SELECT count(*) AS n FROM planner_push WHERE owner=?').get(userId).n>=10)

@@ -5,6 +5,38 @@ import {register} from '../server/auth.js';
 import {changePlanner,initPlanner,plannerInfo,smsTick} from '../server/planner.js';
 import {readDate,inputDate,monthLength} from '../public/components/calendar.js';
 import {dueAlerts,eventsInMonth} from '../public/planner/dates.js';
+import {initPush,syncPush} from '../server/push.js';
+
+test('SMS slots are per account and reusable; alarm-only and push schedules exceed 250',async t=>{
+  const db=openDb(':memory:');t.after(()=>db.close());initPlanner(db);initPush(db);
+  const sms=async()=>{};
+  for(const owner of ['a','b']){
+    db.prepare('INSERT INTO users(id,name,email,password) VALUES (?,?,?,?)').run(owner,owner,owner+'@example.test','unused');
+    db.prepare('INSERT INTO planner_contact(owner,phone) VALUES (?,?)').run(owner,'09120000000');
+  }
+  const save=(owner,id,enabled)=>changePlanner(db,owner,'save',{owner,entry:{
+    id,name:id,kind:'personal',type:'custom',date:'2027-03-21',daysBefore:1,annual:true,sms:enabled
+  }},sms);
+  for(let i=0;i<10;i++)await save('a','sms-'+i,true);
+  await save('a','sms-0',true);
+  await assert.rejects(save('a','extra',true),{status:409,message:'SMS occasion limit reached'});
+  await save('b','extra',true);
+  await save('a','sms-0',false);
+  await save('a','extra',true);
+  await changePlanner(db,'a','delete',{owner:'a',id:'extra'},sms);
+  await save('a','sms-0',true);
+  for(let i=0;i<251;i++)await save('a','alarm-'+i,false);
+  const options={endpoint:'https://web.push.apple.com/test-schedule',source:'account',time:'09:00',timeZone:'Asia/Tehran'};
+  syncPush(db,'a',options);
+  const events=JSON.parse(db.prepare('SELECT schedule FROM planner_push').get().schedule).events;
+  assert.equal(events.length,261);
+  assert.ok(events.every(e=>e.id!=='extra'));
+  db.prepare("UPDATE planner_events SET entry=json_set(entry,'$.sms',json('true')) WHERE owner='a' AND id='alarm-0'").run();
+  initPlanner(db);
+  const migrated=plannerInfo(db,'a',sms).entries;
+  assert.equal(migrated.length,261);
+  assert.equal(migrated.filter(e=>e.sms).length,10);
+});
 
 test('Jalali inputs, leap Esfand, annual recurrence and Iranian lunar alignment',()=>{
   assert.equal(readDate('۱۴۰۵/۱/۱','persian'),'2026-03-21');

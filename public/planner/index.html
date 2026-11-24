@@ -62,7 +62,7 @@
       <section class="sheet day-summary" aria-labelledby="selected-title"><h2 id="selected-title"></h2><div id="selected"></div></section>
       <details class="sheet regional-list"><summary data-label="regionalList"></summary><p id="coverage" class="hint"></p><div id="regional"></div></details>
     </div>
-        <section class="sheet" id="saved" data-view="occasions" hidden><div class="section-top"><h2 data-label="myDates"></h2></div><div id="entries"></div><button id="legacy" hidden data-label="legacy"></button></section>
+        <section class="sheet" id="saved" data-view="occasions" hidden><div class="section-top"><h2 data-label="myDates"></h2><small id="sms-usage"></small></div><div id="entries"></div><button id="legacy" hidden data-label="legacy"></button></section>
         <section class="sheet" data-view="reminders" hidden><div class="section-top"><h2 data-label="reminders"></h2><span id="unread" role="status" aria-live="polite"></span></div><div id="inbox"></div></section>
 
     <section class="sheet preferences" data-view="reminders" hidden aria-labelledby="pref-heading">
@@ -91,6 +91,7 @@
     <div class="event-switches">
       <label><input type="checkbox" name="annual" role="switch"><span data-label="annual"></span></label>
       <label id="sms-option" hidden><input type="checkbox" name="sms" role="switch"><span data-label="smsOption"></span></label>
+      <small id="sms-limit-note" data-label="smsFull" hidden></small>
     </div>
     <details id="event-more"><summary data-label="moreOptions"></summary><div>
       <label><span data-label="recipient"></span><input name="recipient" maxlength="140"></label>
