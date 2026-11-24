@@ -100,7 +100,7 @@ function createNavigation(bar) {
         const action = document.createElement('a');
         action.href = '/planner/#new/'+type;
         action.dataset.quick = type;
-        action.innerHTML = '<i>'+icon(type)+'</i><span></span>';
+        action.innerHTML = '<i>'+icon(type)+'</i>';
         group.append(action);
       }
       const close = (restoreFocus = false) => {
@@ -168,6 +168,9 @@ export function renderNavigation(active, lang, quantity = 0) {
     }
   }
   for (const [type, persian, english] of shortcuts) {
-    bar.querySelector('[data-quick="'+type+'"] span').textContent = fa ? persian : english;
+    const action = bar.querySelector('[data-quick="'+type+'"]');
+    const label = fa ? persian : english;
+    action.setAttribute('aria-label',label);
+    action.title=label;
   }
 }

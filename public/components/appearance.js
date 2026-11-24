@@ -2,16 +2,8 @@ import {icon} from './icons.js';
 import {stored,persist} from './ui.js';
 
 const modes=['dark','auto','light'];
-const legacy=stored('dark',null);
-let mode=stored('themeMode',typeof legacy==='boolean'?(legacy?'dark':'light'):'auto');
-if(!modes.includes(mode))mode='auto';
-
-function paint(){
-  const hour=new Date().getHours();
-  const dark=mode==='dark'||(mode==='auto'&&(hour<7||hour>=19));
-  document.documentElement.dataset.theme=dark?'dark':'light';
-  document.documentElement.classList.toggle('dark',dark);
-}
+let mode=window.SimaGolTheme.preference();
+function paint(){window.SimaGolTheme.paint(mode);}
 export function accountTheme(prefs){
   const value=prefs?.themeMode ?? (typeof prefs?.dark==='boolean'&&!stored('themeMode',null)?(prefs.dark?'dark':'light'):null);
   if(modes.includes(value)){mode=value;persist('themeMode',mode);paint();}

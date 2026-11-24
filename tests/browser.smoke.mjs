@@ -52,6 +52,9 @@ try {
   const quickAdd=page.locator('[data-tab=plus]');
   await quickAdd.focus();
   await page.keyboard.press('Enter');
+  const shortcut=page.locator('[data-quick=birthday]');
+  assert.equal(await shortcut.getAttribute('aria-label'),'Birthday');
+  assert.equal(await shortcut.innerText(),'');
   await page.keyboard.press('Tab');
   assert.equal(await page.locator(':focus').getAttribute('data-quick'),'birthday');
   await page.keyboard.press('Escape');
@@ -102,7 +105,12 @@ try {
     });
     assert.ok(shared,'Profile uses the storefront palette in '+mode+' mode');
   }
+  let allowOrders;
+  const ordersDelayed=new Promise(resolve=>{allowOrders=resolve;});
+  await page.route('**/api/orders',async request=>{await ordersDelayed;await request.continue();},{times:1});
   await page.locator('[href="#account/orders"]').click();
+  assert.ok(await page.locator('.profile-menu').isVisible(),'Previous panel stays painted while orders load');
+  allowOrders();
   await page.locator('#history .order').waitFor();
   await page.locator('[data-logout]').click();
   const login=page.locator('[data-form="Login"]');

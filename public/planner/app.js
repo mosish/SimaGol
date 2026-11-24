@@ -495,6 +495,5 @@ window.addEventListener('online',refreshGreeting);
 appearance();await refreshGreeting();
 plannerReady=true;displayView();if(owner)resumeEditor();
 if(blocked)announce(text(blocked));
-try {
-  device=await initDevice({getSnapshot:snapshot,onMessage:announce,onChange:scanAlerts});
-} catch(error) { announce(error.message); }
+initDevice({getSnapshot:snapshot,onMessage:announce,onChange:scanAlerts})
+  .then(result=>{device=result;}).catch(error=>announce(error.message));

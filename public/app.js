@@ -66,15 +66,17 @@ async function route() {
   const page=$('#tab-page');
   const profilePage=h==='#account'||h.startsWith('#account/');
   const isPage=h==='#bag'||profilePage||h==='#bouquet';
-  page.classList.toggle('dashboard-page',profilePage && Boolean(state.me) && !offline);
   const entering=isPage && page.dataset.route!==h;
-  page.dataset.route=h;
-  $('#home-view').hidden=isPage;
-  page.hidden=!isPage;
-  if (isPage && modal.open) modal.close();
-  if (entering) page.replaceChildren();
-  if (!isPage) page.replaceChildren();
   if(!ready) return;
+  // Keep the previous screen painted until the incoming view is ready.
+  if(!isPage){
+    document.documentElement.classList.remove('opening-account');
+    page.classList.remove('dashboard-page');
+    page.hidden=true;
+    page.replaceChildren();
+    page.dataset.route=h;
+    $('#home-view').hidden=false;
+  }
   if(['','#','#catalog','#favorites'].includes(h)){
     if(modal.open)modal.close();
     collection();
@@ -98,6 +100,12 @@ async function route() {
   if(isPage) {
     content.replaceChildren();
     page.innerHTML=html;
+    document.documentElement.classList.remove('opening-account');
+    page.dataset.route=h;
+    page.classList.toggle('dashboard-page',profilePage && Boolean(state.me) && !offline);
+    page.hidden=false;
+    $('#home-view').hidden=true;
+    if (modal.open) modal.close();
     if (h==='#bag') {
       page.querySelector('h2').textContent=t('Shopping bag');
       if (!selectedItems().length) page.insertAdjacentHTML('beforeend','<p><a class="cta" href="/">'+label('Browse flowers')+'</a></p>');
@@ -284,4 +292,4 @@ async function boot() {
 }
 window.addEventListener('online',boot);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/planner/sw.js',{scope:'/',updateViaCache:'none'}).catch(()=>{});
-boot();
+await boot();

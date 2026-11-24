@@ -1,3 +1,8 @@
+@view-transition { navigation: auto; }
+::view-transition-group(root) { animation-duration: 160ms; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root), ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0s; }
+}
 :root {
   color-scheme:light;
   --bg:#faf7f9;
@@ -21,6 +26,8 @@ html {
   scroll-padding-top:1.2rem;
 }
 
+html { background: var(--bg); }
+.opening-account #home-view { display: none; }
 body {
   margin:0;
   background:var(--bg);
@@ -1021,7 +1028,7 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   inset-inline: 0;
   bottom: calc(100% + 23px);
   margin-inline: auto;
-  width: min(278px, 100%);
+  width: min(210px, 100%);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
@@ -1039,9 +1046,10 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   opacity: .92;
 }
 #quick-reminders a {
+  min-width: 44px;
+  min-height: 44px;
   display: grid;
   justify-items: center;
-  gap: 4px;
   width: fit-content;
   max-width: 100%;
   justify-self: center;
@@ -1059,18 +1067,6 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   background: var(--dock);
   color: var(--gold);
   box-shadow: 0 3px 10px #21142538;
-}
-#quick-reminders span {
-  white-space: nowrap;
-  padding: 2px 7px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: .72rem;
-  font-weight: 600;
-  line-height: 1.5;
-  text-align: center;
 }
 @media (prefers-reduced-motion: no-preference) {
   #quick-reminders:not([hidden]) a { animation: reveal-shortcut .16s ease-out; }
