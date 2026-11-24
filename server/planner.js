@@ -25,7 +25,7 @@ export function plannerInfo(db,user,sms){
   const c=db.prepare('SELECT phone,time,zone FROM planner_contact WHERE owner=?').get(user)||{};
   return {owner:user,entries:entries(db,user),smsAvailable:Boolean(sms),verifiedPhone:c.phone||'',time:c.time,zone:c.zone};
 }
-function phoneOf(value){
+export function phoneOf(value){
   const v=String(value||'').replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776)).replace(/^\+98/,'0');
   if(!/^09\d{9}$/.test(v))fail(400,'Invalid mobile number');return v;
 }

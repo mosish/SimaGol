@@ -1,11 +1,11 @@
 // Bump this version when changing an asset in a source deployment.
-const cacheName = 'simagol-planner-shell-v14';
+const cacheName = 'simagol-planner-shell-v15';
 const shell = '/planner/';
 const assets = [
   shell, '/planner/index.html', '/planner/manifest.json', '/planner/planner.css',
   '/planner/app.js', '/planner/store.js', '/planner/dates.js', '/planner/device.js',
   '/planner/images/icon-192.png', '/planner/images/icon-512.png', '/planner/images/apple-touch.png',
-  '/', '/index.html', '/shop.css', '/app.js', '/labels.json',
+  '/components/signin.js', '/', '/index.html', '/shop.css', '/app.js', '/labels.json',
   '/components/theme.js', '/components/greeting.js', '/components/navigation.js', '/components/icons.js',
   '/components/install.js', '/components/ui.js', '/components/home.js', '/components/store.js',
   '/components/account.js', '/components/appearance.js', '/components/calendar.js', '/planner/iran.js',

@@ -55,7 +55,7 @@ try {
   const chosen=await choose.getAttribute('data-choose');
   await choose.click();
   await page.waitForURL('**/#account/planner-login');
-  await page.locator('summary').filter({hasText:'Register'}).click();
+  await page.locator('[data-auth=register]').click();
   const registration=page.locator('[data-form="Register"]');
   await registration.locator('[name=name]').fill('Planner member');
   await registration.locator('[name=email]').fill('planner@example.test');

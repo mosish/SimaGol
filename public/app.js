@@ -1,3 +1,4 @@
+import {auth,authClick,sendAuth} from './components/signin.js';
 import {appearanceControls,accountTheme} from './components/appearance.js';
 import { $, state, t, label, persist, api, mascot, changeBag, selectedItems, stored } from './components/ui.js';
 import { icon } from './components/icons.js';
@@ -87,7 +88,11 @@ async function route() {
     if(offline && (tab==='profile'||h==='#checkout')) html='<p>'+label('Connect to shop')+'</p><button class="cta" data-retry>'+label('Retry')+'</button>';
     else if(h==='#bag') html=bagView();
     else if(h==='#checkout'){returnTo='#checkout';html=checkout();}
-    else if(profilePage){returnTo=h;html=await account(...h.split('/').slice(1));}
+    else if(profilePage){
+      const reset=h.startsWith('#account/reset/');
+      returnTo=reset||h==='#account/provider-error'?'#account':h;
+      html=reset?auth():await account(...h.split('/').slice(1));
+    }
     else if(h==='#bouquet') html='<section class="bouquet-teaser"><span class="bouquet-mark">'+icon('bouquet')+'</span><h2>'+label('Bouquet studio')+'</h2><strong>'+label('Coming soon')+'</strong><p>'+label('Bouquet studio description')+'</p><a class="cta" href="/">'+label('Browse flowers')+'</a></section>';
 
     else if(h.startsWith('#invoice/')) html=invoice(await api('orders/'+encodeURIComponent(h.slice(9))));
@@ -148,6 +153,7 @@ $('#search').oninput=collection;
 window.addEventListener('hashchange',route);
 
 async function act(b) {
+  if(b.hasAttribute('data-provider')||b.hasAttribute('data-auth'))return authClick(b);
   if (b.dataset.readNotices) {
     await api('notifications/read','POST',{through:Number(b.dataset.readNotices)});
     const notices=await api('notifications');
@@ -212,7 +218,7 @@ async function submit(form) {
   const data=Object.fromEntries(new FormData(form));
   for(const el of form.querySelectorAll('[type=checkbox]'))data[el.name]=el.checked;
   if(k==='Register'||k==='Login'){
-    await api(k.toLowerCase(),'POST',data);
+    if(!await sendAuth(form,data))return;
     await refresh();if(location.hash==='#account/planner-login'){location.assign('/planner/');return;}if(location.hash!==returnTo)location.hash=returnTo;
   } else if(k==='profile'){
     const {name,...contact}=data;
@@ -258,7 +264,8 @@ document.addEventListener('submit',async e=>{
     if(form.dataset.form==='checkout' && ['Price changed','Stock unavailable','Time slot unavailable','Delivery unavailable'].includes(error.message)){
       try {await refresh();await route();} catch {}
     }
-    notify(t(error.message));
+    const status=form.querySelector('.auth-status');
+    if(status)status.textContent=t(error.message);else notify(t(error.message));
   }
   finally {button.disabled=false;}
 });

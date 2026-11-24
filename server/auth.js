@@ -39,7 +39,7 @@ async function stretch(password, salt) {
 function user(row) {
   if (!row) return null;
   return {
-    id: row.id, email: row.email, name: row.name, role: row.role,
+    id: row.id, email: row.email.includes('@')?row.email:'', name: row.name, role: row.role,
     addresses: JSON.parse(row.addresses), prefs: JSON.parse(row.prefs)
   };
 }
@@ -50,16 +50,19 @@ function userById(db, id) {
   return account;
 }
 
-export async function register(db, body) {
-  const email = emailKey(body?.email);
-  const name = trimmed(body?.name, 120, 'Invalid name');
-  const password = body?.password;
+export async function passwordHash(password) {
   if (typeof password !== 'string' || [...password].length < 12 || Buffer.byteLength(password) > 1024) {
     fail(400, 'Invalid password');
   }
   const salt = randomBytes(16);
   const key = await stretch(password, salt);
-  const encoded = `scrypt-v1$${salt.toString('hex')}$${key.toString('hex')}`;
+  return `scrypt-v1$${salt.toString('hex')}$${key.toString('hex')}`;
+}
+
+export async function register(db, body) {
+  const email=emailKey(body?.email);
+  const name=trimmed(body?.name,120,'Invalid name');
+  const encoded=await passwordHash(body?.password);
   const id = randomUUID();
   const inserted = db.prepare(`INSERT INTO users (id,email,name,password,role)
     VALUES (?,?,?,?,'customer') ON CONFLICT(email) DO NOTHING`).run(id, email, name, encoded);

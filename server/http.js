@@ -43,7 +43,9 @@ async function media(dir, data) {
   return {path:'uploads/'+name};
 }
 
-export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy,pushCredentials=null,sms=null}) {
+import {providerConfig,beginProvider,finishProvider,requestSms,verifySms,recoveryMailer,requestReset,resetPassword} from './identity.js';
+
+export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy,pushCredentials=null,sms=null,providers=providerConfig(),mail=recoveryMailer()}) {
   initPush(db);initPlanner(db);
   const attempts=new Map();
   function throttle(ip) {
@@ -94,11 +96,26 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
         if(!user) fail(401,'Please sign in');
         if(roles&&!roles.includes(user.role)) fail(403,'Access denied');
       };
+      const cookie=(value,seconds)=>'sg_session='+value+(seconds===null?'':'; Max-Age='+seconds)+'; Path=/; HttpOnly; SameSite=Lax'+(production?'; Secure':'');
+      const flowCookie=(value,seconds)=>'sg_flow='+value+'; Max-Age='+seconds+'; Path=/api/identity/; HttpOnly; SameSite=Lax'+(production?'; Secure':'');
       if(method==='GET') {
+        const callback=/^identity\/(apple|google)\/callback$/.exec(key);
+        if(callback){
+          const browser=(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith('sg_flow='))?.slice(8);
+          let dest='/#account/provider-error';
+          res.setHeader('Set-Cookie',flowCookie('',0));
+          try{
+            const result=await finishProvider(db,providers,callback[1],origin,new URL(req.url,origin).searchParams,browser);
+            if(token)logout(db,token);
+            res.setHeader('Set-Cookie',[cookie(newSession(db,result.id),null),flowCookie('',0)]);
+            dest=result.dest;
+          }catch{/* Only redirect to an allowlisted local page. */}
+          res.writeHead(303,{Location:dest});return res.end();
+        }
         if(key==='planner'){permit();return send(plannerInfo(db,user.id,sms));}
         if(key==='push/config') return send({enabled:!!pushCredentials,publicKey:pushCredentials?.publicKey||null});
         if(key==='health') {db.prepare('SELECT 1').get();return send({ok:true});}
-        if(key==='store') return send({catalog:catalog(db),settings:{...settings(db),ordersEnabled}});
+        if(key==='store') return send({catalog:catalog(db),settings:{...settings(db),ordersEnabled,authMethods:{sms:!!sms,google:!!providers.google,apple:!!providers.apple,recovery:!!mail}}});
         if(key==='me') return send(user);
         if(key==='orders') {permit();return send(orders(db,user.id));}
         if(key==='notifications') {permit();return send(notifications(db,user.id));}
@@ -113,7 +130,7 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
           const out={};
           if(user.role!=='editor') out.orders=orders(db);
           if(user.role!=='florist') out.products=catalog(db,true).products;
-          if(user.role==='owner') out.clients=db.prepare('SELECT id,email,name,role FROM users ORDER BY name').all();
+          if(user.role==='owner') out.clients=db.prepare('SELECT id,CASE WHEN instr(email,\'@\')>0 THEN email ELSE \'\' END AS email,name,role FROM users ORDER BY name').all();
           return send(out);
         }
         fail(404,'Page not found');
@@ -121,7 +138,7 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
       if(method!=='POST') fail(405,'Method unavailable');
       if(req.headers.origin!==origin || req.headers['x-simagol']!=='1') fail(403,'Access denied');
       if(req.headers['content-type']?.split(';')[0]!=='application/json') fail(415,'Invalid input');
-      if(key==='login'||key==='register') {
+      if(key==='login'||key==='register'||key.startsWith('identity/')) {
         const peer=req.socket.remoteAddress;
         const forwarded=req.headers['x-real-ip'];
         const fromProxy=trustedProxy && peer===trustedProxy && typeof forwarded==='string' && isIP(forwarded);
@@ -129,14 +146,26 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
       }
       if(key==='admin/upload') permit(['owner','editor']);
       const b=await bodyOf(req,key==='admin/upload'?2900000:64000);
-      const cookie=(value,seconds)=>res.setHeader('Set-Cookie','sg_session='+value+'; Max-Age='+seconds+'; Path=/; HttpOnly; SameSite=Lax'+(production?'; Secure':''));
+      if(key==='identity/sms/request')return send(await requestSms(db,sms,b));
+      if(key==='identity/sms/verify'){
+        if(!sms)fail(503,'SMS sign-in unavailable');
+        const id=verifySms(db,b);
+        if(token)logout(db,token);
+        res.setHeader('Set-Cookie',cookie(newSession(db,id),b.remember===true?604800:null));return send({ok:true});
+      }
+      if(key==='identity/provider'){
+        const flow=beginProvider(db,providers,b.provider,origin,b.back);
+        res.setHeader('Set-Cookie',flowCookie(flow.browser,600));return send({url:flow.url});
+      }
+      if(key==='identity/forgot')return send(requestReset(db,mail,b.email,origin));
+      if(key==='identity/reset')return send(await resetPassword(db,b.token,b.password));
       if(key==='register'||key==='login') {
         const account=await (key==='register'?register(db,b):login(db,b));
         if(token) logout(db,token);
-        cookie(newSession(db,account.id),604800);
+        res.setHeader('Set-Cookie',cookie(newSession(db,account.id),b.remember===false?null:604800));
         return send(account,key==='register'?201:200);
       }
-      if(key==='logout') {logout(db,token);cookie('',0);return send({ok:true});}
+      if(key==='logout') {logout(db,token);res.setHeader('Set-Cookie',cookie('',0));return send({ok:true});}
       permit();
       if(key.startsWith('planner/')) return send(await changePlanner(db,user.id,key.slice(8),b,sms));
       if(key==='push/delete') return send(deletePush(db,user.id,b));

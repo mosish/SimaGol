@@ -1,6 +1,6 @@
 # HTTP API
 
-Use the same origin that serves the storefront. Every write uses POST with a JSON object, Content-Type: application/json, the exact APP_ORIGIN in the Origin header and X-SimaGol: 1. Successful reads and writes return JSON. Authentication uses sg_session, a seven-day HttpOnly, SameSite=Lax cookie that is Secure in production. Login replaces the current session and logout revokes it. Keep session cookies private.
+Use the same origin that serves the storefront. Every write uses POST with a JSON object, Content-Type: application/json, the exact APP_ORIGIN in the Origin header and X-SimaGol: 1. Successful reads and writes return JSON. Authentication uses an HttpOnly, SameSite=Lax session cookie, marked Secure in production. The customer form keeps it for the browser session by default. Remember me persists it for seven days. Login replaces the current session and logout revokes it. Keep session cookies private.
 
 ## Routes
 
@@ -67,3 +67,11 @@ Send the same order body and request key after a lost response. A replay returns
 Errors use {"error":"message"} and an HTTP status. Common responses include 400 for invalid fields, 401 for missing or invalid login, 403 for a role/origin/header mismatch, 404 for a missing resource, 405 for unsupported methods, 409 for changed stock/price/slot or state conflicts, 413 for oversized request bodies, 415 for an unsupported content type, 422 for invalid decoded image data, 429 for throttling, and 500 for an unexpected service error.
 
 Standard JSON bodies are limited to 64,000 bytes, upload bodies to 2,900,000 bytes. Login and registration share a 30-request limit per ten minutes per socket IP. At most two password hashes run simultaneously per process. Registration requires at least 12 Unicode code points and a password of at most 1,024 UTF-8 bytes. Sessions use random 32-byte tokens and SHA-256 lookup keys. Expired sessions fail authentication and are pruned when a new session is created.
+
+## Customer identity methods
+
+The storefront reads `settings.authMethods` from `GET /api/store`. Email/password works locally. SMS uses the server-side `sms(phone,'code',code)` adapter supplied to the HTTP handler. Configure the store's SMS panel before accepting mobile sign-ins. Send the mobile number to `POST /api/identity/sms/request`; submit the returned challenge and the six-digit code to `POST /api/identity/sms/verify`. Sign-up also requires `register: true` and a name. Codes expire after five minutes.
+
+For Google or Apple, configure the server-side ID and secret in `.env.example` and register `APP_ORIGIN/api/identity/google/callback` or `APP_ORIGIN/api/identity/apple/callback` with the provider. Apple uses a Services ID and a time-limited signed client secret. The browser starts at `POST /api/identity/provider` and follows the returned authorization URL. Accounts are identified by provider and verified subject. Customer contact details do not link sign-in methods automatically.
+
+The optional recovery email adapter uses Resend and a verified sender. `POST /api/identity/forgot` accepts an email and returns the same acknowledgement for existing and unknown accounts. `POST /api/identity/reset` takes the emailed token and new password, then invalidates existing sessions.

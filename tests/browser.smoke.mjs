@@ -21,7 +21,9 @@ try {
   server.listen(0,'127.0.0.1');
   await once(server,'listening');
   const origin='http://127.0.0.1:'+server.address().port;
-  server.on('request',createHandler({db,dir,origin,production:false,ordersEnabled:true}));
+  let deliveredCode;
+  const sms=async (_phone,_kind,code)=>{deliveredCode=code;};
+  server.on('request',createHandler({db,dir,origin,sms,production:false,ordersEnabled:true}));
   browser=await chromium.launch();
   const context=await browser.newContext({viewport:{width:1280,height:900}});
   const page=await context.newPage();
@@ -69,7 +71,7 @@ try {
   await page.locator('.product h3 a').click();
   await page.locator('#panel .detail-actions [data-add]').click();
   await page.locator('#tab-page a[href="#checkout"]').click();
-  await page.locator('summary').filter({hasText:'Register'}).click();
+  await page.locator('[data-auth=register]').click();
   const registration=page.locator('[data-form="Register"]');
   await registration.locator('[name=name]').fill('Test Buyer');
   await registration.locator('[name=email]').fill('buyer@example.test');
@@ -131,6 +133,21 @@ try {
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'horizontal overflow at '+width+'px');
   }
   assert.deepEqual(errors,[]);
+  const guest=await browser.newPage({viewport:{width:390,height:844}});
+  await guest.goto(origin+'/#account');
+  await guest.locator('[data-auth=reveal]').click();
+  assert.equal(await guest.locator('.auth-card [name=password]').getAttribute('type'),'text');
+  await guest.locator('[data-auth=register]').click();
+  await guest.locator('[data-provider=sms]').click();
+  const phoneForm=guest.locator('.auth-card form');
+  await phoneForm.locator('[name=name]').fill('Test Customer');
+  await phoneForm.locator('[name=phone]').fill('09120001111');
+  await phoneForm.locator('[type=submit]').click();
+  await phoneForm.locator('[name=code]').waitFor();
+  await phoneForm.locator('[name=code]').fill(deliveredCode);
+  await phoneForm.locator('[type=submit]').click();
+  await guest.locator('[data-logout]').first().waitFor();
+  await guest.close();
   console.log('Chromium passed locale/theme, favorite, cart, scheduled gift order, invoice, history, staff fulfilment and viewport checks.');
 } finally {
   await browser?.close();

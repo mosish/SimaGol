@@ -1,10 +1,7 @@
 import {dateLocale,inputDate,calendarSystem} from './calendar.js';
 import {state,esc,t,label,price,field,button,select,selectedItems,api,num} from './ui.js';
 import {icon} from './icons.js';
-export function auth() {
-  return '<h2>'+label('Account')+'</h2>'+['Login','Register'].map(k=>'<details '+(k==='Login'?'open':'')+'><summary>'+label(k)+'</summary><form data-form="'+k+'">'+
-    (k==='Register'?field('name','Name'):'')+field('email','Email','','email')+field('password','Password','','password')+'<small>'+label('Use at least 12 characters')+'</small>'+button(k)+'</form></details>').join('');
-}
+import {auth} from './signin.js';
 function openSlots() {
   return state.settings.slots.filter(slot => Date.parse(slot.ends) > Date.now() && slot.booked < slot.capacity);
 }
