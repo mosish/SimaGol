@@ -34,7 +34,7 @@ try {
   await page.locator('.product').first().waitFor();
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   assert.equal(await page.locator('.product').count(),4);
-  assert.equal(await page.locator('.app-tabs a').count(),5);
+  assert.equal(await page.locator('.app-tabs [data-tab]').count(),5);
   assert.equal(await page.locator('.product .pic').first().getAttribute('href'),'#product/lily');
   assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
   assert.equal(await page.locator('header #calendar').count(),0);
@@ -49,6 +49,16 @@ try {
   await page.waitForFunction(()=>document.documentElement.classList.contains('dark'));
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
 
+  const quickAdd=page.locator('[data-tab=plus]');
+  await quickAdd.focus();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  assert.equal(await page.locator(':focus').getAttribute('data-quick'),'birthday');
+  await page.keyboard.press('Escape');
+  assert.ok(await quickAdd.evaluate(el=>el===document.activeElement));
+  await quickAdd.click();
+  await page.locator('.brand strong').click();
+  assert.ok(!await page.locator('#quick-reminders').isVisible());
   await page.locator('#search').fill('Velvet');
   await page.locator('[data-fav="blush"]').click();
   await page.locator('#favorites').click();

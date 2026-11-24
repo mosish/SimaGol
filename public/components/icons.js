@@ -1,5 +1,8 @@
 const shapes={flower:'<g fill="none"><ellipse cy="7" cx="12" rx="3.2" ry="5"/><ellipse cy="7" cx="12" rx="3.2" ry="5" transform="rotate(72 12 12)"/><ellipse cy="7" cx="12" rx="3.2" ry="5" transform="rotate(144 12 12)"/><ellipse cy="7" cx="12" rx="3.2" ry="5" transform="rotate(216 12 12)"/><ellipse cy="7" cx="12" rx="3.2" ry="5" transform="rotate(288 12 12)"/></g><circle cx="12" cy="12" r="2.4" fill="currentColor"/>',bag:'<path d="M5 7h14l1 14H4L5 7Zm4 0V5a3 3 0 0 1 6 0v2"/>',sprig:'<path d="M4 21C13 15 14 9 19 3M8 17C3 17 3 12 3 11q7 0 7 4m2-5q-6-2-5-7 7 2 7 6m-2 5q7-6 10-3-3 6-11 6"/>',search:'<circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/>',heart:'<path d="M12 20S2 14 2 8.5C2 3 9 2 12 7c3-5 10-4 10 1.5C22 14 12 20 12 20Z"/>',plus:'<path d="M12 5v14M5 12h14"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>',moon:'<path d="M20 15A9 9 0 0 1 9 3a9 9 0 1 0 11 12Z"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/>'};
 Object.assign(shapes, {
+  birthday:'<path d="M3 21h18M4 20v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7M4 15q2 3 4 0 2 3 4 0 2 3 4 0 2 3 4 0M8 11V8m8 3V8m-4 3V6M8 5l.4-.7m7.6.7.4-.7M12 3l.4-.8"/>',
+  anniversary:'<circle cx="8.2" cy="14" r="5.5"/><circle cx="15.8" cy="14" r="5.5"/><path d="m9 5 3 2 3-2-1.5-2h-3z"/>',
+  custom:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/>',
   automatic:'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none"/>',
   wallet:'<path d="M20 8V5H6a3 3 0 0 0 0 6h15v9H6a3 3 0 0 1-3-3V8m18 5h-5v4h5"/>',
   bookmark:'<path d="M5 3h14v18l-7-5-7 5z"/>',

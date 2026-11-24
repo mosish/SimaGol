@@ -332,9 +332,10 @@ function configureReminder() {
   field('daysBefore').closest('label').hidden=occasion;
   $('#holiday-lead').hidden=!occasion;
 }
-function openEditor(entry,holiday) {
+const quickTypes=['birthday','anniversary','custom'];
+function openEditor(entry,holiday,quickType) {
   if(!owner && navigator.onLine){
-    try{sessionStorage.setItem('simagol.newReminder',JSON.stringify({date:holiday?.date||selected,holidayId:holiday?.id}));}catch{}
+    try{sessionStorage.setItem('simagol.newReminder',JSON.stringify({date:holiday?.date||selected,holidayId:holiday?.id,quickType}));}catch{}
   }
   if(!requireAccount())return;
   if($('#day-sheet').open)$('#day-sheet').close();
@@ -342,8 +343,8 @@ function openEditor(entry,holiday) {
   form.reset();
   const rule=holiday || HOLIDAYS.find(h=>h.id===entry?.holidayId);
   form.dataset.holiday=rule?.id||'';
-  $('#form-title').textContent=text(entry?'editDate':'newDate');
-  field('type').value=rule || entry?.kind==='occasion' ? 'occasion' : entry?.type || 'birthday';
+  $('#form-title').textContent=text(entry?'editDate':'newDate')+(quickType?' · '+text(quickType):'');
+  field('type').value=rule || entry?.kind==='occasion' ? 'occasion' : entry?.type || quickType || 'birthday';
   field('type').disabled=!!rule;
   field('name').value=entry?.name || (rule?title(rule):'');
   field('date').value=inputDate(entry?.date||holiday?.date||selected);
@@ -385,15 +386,17 @@ let activeView='calendar';
 let plannerReady=false;
 function displayView(){
   const name=location.hash.slice(1);
-  if(name==='new' && !plannerReady)return;
-  if(name==='new')history.replaceState(null,'','#'+activeView);
+  const quickType=quickTypes.find(type=>name==='new/'+type);
+  const creating=name==='new'||!!quickType;
+  if(creating && !plannerReady)return;
+  if(creating)history.replaceState(null,'','#'+activeView);
   else activeView=['occasions','reminders'].includes(name)?name:'calendar';
   document.querySelectorAll('[data-view]').forEach(el=>el.hidden=el.dataset.view!==activeView);
   document.querySelectorAll('.planner-views a').forEach(link=>{
     if(link.hash==='#'+activeView)link.setAttribute('aria-current','page');
     else link.removeAttribute('aria-current');
   });
-  if(name==='new')openEditor();
+  if(creating)openEditor(undefined,undefined,quickType);
 }
 function resumeEditor(){
   let intent;
@@ -401,7 +404,7 @@ function resumeEditor(){
   if(!owner||!intent||$('#editor').open||!/^\d{4}-\d{2}-\d{2}$/.test(intent.date))return;
   displayDate(intent.date);calendar();
   const holiday=HOLIDAYS.find(h=>h.id===intent.holidayId);
-  openEditor(undefined,holiday?{...holiday,date:intent.date}:undefined);
+  openEditor(undefined,holiday?{...holiday,date:intent.date}:undefined,quickTypes.includes(intent.quickType)?intent.quickType:undefined);
 }
 $('#close-day').onclick=()=>$('#day-sheet').close();
 window.addEventListener('hashchange',displayView);

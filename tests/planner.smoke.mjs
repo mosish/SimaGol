@@ -68,7 +68,15 @@ try {
   await page.locator('#calendar-system [value=gregory]').check();
   assert.equal(await page.locator('.days [aria-pressed=true]').getAttribute('data-day'),'2026-03-21');
   await page.locator('[data-tab=plus]').click();
-  await input('type').selectOption('birthday');
+  for(const type of ['anniversary','custom','birthday']){
+    await page.locator('[data-quick="'+type+'"]').click();
+    assert.equal(await input('type').inputValue(),type);
+    assert.ok(await page.locator('#editor').isVisible());
+    if(type!=='birthday'){
+      await page.locator('#cancel').click();
+      await page.locator('[data-tab=plus]').click();
+    }
+  }
   await input('name').fill('Birthday smoke');
   await input('date').fill('2028-06-11');
   await input('recipient').fill('Gift recipient');
@@ -130,8 +138,22 @@ try {
   await page.waitForFunction(async()=>(await (await fetch('/api/planner')).json()).entries.every(e=>e.name!=='Birthday smoke'));
   await page.locator('[data-tab=home]').click();
   await page.locator('[data-tab=plus]').click();
+  await page.locator('[data-quick=custom]').click();
   await page.locator('#editor[open]').waitFor();
+  assert.equal(await input('type').inputValue(),'custom');
   assert.equal(await editor.getAttribute('data-holiday'),'');
+  const guest=await browser.newPage();
+  await guest.goto(origin);
+  await guest.locator('[data-tab=plus]').click();
+  await guest.locator('[data-quick=anniversary]').click();
+  await guest.waitForURL('**/#account/planner-login');
+  const login=guest.locator('[data-form="Login"]');
+  await login.locator('[name=email]').fill('planner@example.test');
+  await login.locator('[name=password]').fill('test-only-flower-planner');
+  await login.locator('[type=submit]').click();
+  await guest.locator('#editor[open]').waitFor();
+  assert.equal(await guest.locator('#event-form [name=type]').inputValue(),'anniversary');
+  await guest.close();
   assert.deepEqual(pageErrors,[]);
   console.log('Mobile Chromium verified planner CRUD, Solar/Gregorian selection and authenticated saves, standalone manifest, offline reload and offline edits.');
 } finally {
