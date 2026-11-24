@@ -87,7 +87,9 @@ try {
   assert.equal(await birthday.count(),0);
   await page.locator('[data-tab="home"]').click();
   await page.locator('[data-tab="home"][aria-current="page"]').waitFor();
-  await page.locator('[data-tab="bag"]').click();
+  await page.locator('[data-tab="bouquet"]').click();
+  await page.locator('.bouquet-teaser').waitFor();
+  await page.locator('.header-cart').click();
   await page.locator('#tab-page h2').waitFor();
   await page.locator('[data-tab="bell"]').click();
   await entries.getByRole('heading',{name:"National Doctors' Day"}).waitFor();

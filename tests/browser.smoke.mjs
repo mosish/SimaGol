@@ -76,6 +76,7 @@ try {
   assert.match(await page.locator('.invoice').textContent(),/Test gift/);
   await page.locator('.close').click();
   await page.locator('[data-tab="profile"]').click();
+  await page.locator('[href="#account/orders"]').click();
   await page.locator('#history .order').waitFor();
   await page.locator('[data-logout]').click();
   const login=page.locator('[data-form="Login"]');

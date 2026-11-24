@@ -4,7 +4,7 @@ import { setupInstall } from './components/install.js';
 import { renderGreeting } from './components/greeting.js';
 import { renderNavigation } from './components/navigation.js';
 import { collection, product, bagView } from './components/store.js';
-import { account, checkout, checkoutFields, invoice, orderCard, notificationList } from './components/account.js';
+import { account, checkout, checkoutFields, invoice, orderList, notificationList } from './components/account.js';
 import { showHomepage } from './components/home.js';
 import { admin } from './components/admin.js';
 
@@ -55,7 +55,8 @@ function closeView() {
 }
 function activeTab(hash) {
   if (hash==='#bag'||hash==='#checkout') return 'bag';
-  if (hash==='#account'||hash==='#admin'||hash.startsWith('#invoice/')) return 'profile';
+  if (hash==='#bouquet') return 'bouquet';
+  if (hash==='#account'||hash.startsWith('#account/')||hash==='#admin'||hash.startsWith('#invoice/')) return 'profile';
   return 'home';
 }
 function updateTabs() {
@@ -68,7 +69,9 @@ async function route() {
   const tab=activeTab(h);
   updateTabs();
   const page=$('#tab-page');
-  const isPage=h==='#bag'||h==='#account';
+  const profilePage=h==='#account'||h.startsWith('#account/');
+  const isPage=h==='#bag'||profilePage||h==='#bouquet';
+  page.classList.toggle('dashboard-page',profilePage && Boolean(state.me) && !offline);
   const entering=isPage && page.dataset.route!==h;
   page.dataset.route=h;
   $('#home-view').hidden=isPage;
@@ -87,7 +90,8 @@ async function route() {
     if(offline && (tab==='profile'||h==='#checkout')) html='<p>'+label('Connect to shop')+'</p><button class="cta" data-retry>'+label('Retry')+'</button>';
     else if(h==='#bag') html=bagView();
     else if(h==='#checkout'){returnTo='#checkout';html=checkout();}
-    else if(h==='#account'){returnTo='#account';html=await account();}
+    else if(profilePage){returnTo=h;html=await account(...h.split('/').slice(1));}
+    else if(h==='#bouquet') html='<section class="bouquet-teaser"><span class="bouquet-mark">'+icon('bouquet')+'</span><h2>'+label('Bouquet studio')+'</h2><strong>'+label('Coming soon')+'</strong><p>'+label('Bouquet studio description')+'</p><a class="cta" href="/">'+label('Browse flowers')+'</a></section>';
     else if(h==='#admin') html=await admin();
     else if(h.startsWith('#invoice/')) html=invoice(await api('orders/'+encodeURIComponent(h.slice(9))));
     else {
@@ -100,7 +104,7 @@ async function route() {
     content.replaceChildren();
     page.innerHTML=html;
     if (h==='#bag') {
-      page.querySelector('h2').textContent=t('Shopping list');
+      page.querySelector('h2').textContent=t('Shopping bag');
       if (!selectedItems().length) page.insertAdjacentHTML('beforeend','<p><a class="cta" href="/">'+label('Browse flowers')+'</a></p>');
     }
     if (entering) page.focus();
@@ -147,8 +151,13 @@ async function act(b) {
   if (b.dataset.readNotices) {
     await api('notifications/read','POST',{through:Number(b.dataset.readNotices)});
     const notices=await api('notifications');
-    if(location.hash==='#account' && $('#notices')) $('#notices').innerHTML=notificationList(notices);
+    if($('#notices')) $('#notices').innerHTML=notificationList(notices);
     return;
+  }
+  if (b.hasAttribute('data-delete-address')) {
+    if (!confirm(t('Delete address?'))) return;
+    const addresses=state.me.addresses.filter((_,i)=>i!==Number(b.dataset.deleteAddress));
+    await api('profile','POST',{addresses});await refresh();await route();return;
   }
   if(b.dataset.filter){state.category=b.dataset.filter;collection();return;}
   if(b.dataset.fav){
@@ -207,7 +216,14 @@ async function submit(form) {
     await api(k.toLowerCase(),'POST',data);
     await refresh();if(location.hash!==returnTo)location.hash=returnTo;
   } else if(k==='profile'){
-    await api('profile','POST',{name:data.name,addresses:data.addresses.split('\n').map(s=>s.trim()).filter(Boolean)});
+    await api('profile','POST',{name:data.name});
+    await refresh();
+  } else if(k==='address'){
+    const addresses=[...state.me.addresses];
+    const index=Number(data.index);
+    if(index===-1) addresses.push(data.address.trim());
+    else addresses[index]=data.address.trim();
+    await api('profile','POST',{addresses});
     await refresh();
   } else if(k==='checkout'){
     if(!form.reportValidity())return;
@@ -248,12 +264,18 @@ document.addEventListener('submit',async e=>{
   finally {button.disabled=false;}
 });
 setInterval(async()=>{
-  if(document.hidden||!state.me||location.hash!=='#account'||!$('#history'))return;
+  const path=location.hash;
+  if(document.hidden||!state.me)return;
+  const history=$('#history'), notices=$('#notices');
   try {
-    const [rows,notices]=await Promise.all([api('orders'),api('notifications')]);
-    if(location.hash==='#account' && $('#notices')) $('#notices').innerHTML=notificationList(notices);
-    if(location.hash==='#account'&&$('#history'))$('#history').innerHTML=rows.map(o=>orderCard(o)).join('')||label('No orders yet');
-  }catch{ /* Keep the last known order history until the next successful read. */ }
+    if(history) {
+      const rows=await api('orders');
+      if(location.hash===path && history.isConnected) history.innerHTML=orderList(rows,path.split('/')[2]);
+    } else if(notices) {
+      const items=await api('notifications');
+      if(location.hash===path && notices.isConnected) notices.innerHTML=notificationList(items);
+    }
+  }catch{ /* Keep the last successful update. */ }
 },15000);
 async function boot() {
   if(!['/','/index.html'].includes(location.pathname) && !location.hash)history.replaceState(null,'','/#missing');

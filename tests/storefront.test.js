@@ -78,9 +78,11 @@ test('account history links to its invoice, and invoice renders purchased item s
     assert.equal(url,'/api/orders'); return {ok:true,json:async()=>[order]};
   });
   state.me=buyer; state.lang='en';
-  const history=await account();
+  const history=await account('orders');
   assert(history.includes('href="#invoice/'+order.id+'"'));
-  assert(history.includes('data-read-notices="1"'));
+  assert((await account('notifications')).includes('data-read-notices="1"'));
+  assert((await account('orders','cancelled')).includes(t('No matching orders')));
+  assert((await account('addresses')).includes('Tehran'));
   const receipt=invoice(order);
   assert(receipt.includes('Snapshot rose') && receipt.includes('Street A') && receipt.includes(price(1040)));
 });

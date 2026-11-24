@@ -149,7 +149,9 @@ function displayDate(date) {
   [year,month]=date.split('-').map(Number);
 }
 function appearance() {
-  renderNavigation('bell', lang);
+  let quantity=0;
+  try { quantity=Object.values(JSON.parse(localStorage.getItem('simagol.bag'))||{}).filter(Number.isInteger).reduce((a,b)=>a+b,0); } catch {}
+  renderNavigation('bell', lang, quantity);
   renderGreeting($('.brand small'), customerName, lang);
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';

@@ -962,4 +962,41 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   .header-wrap nav { width: auto; order: initial; }
   .search input, #tab-page input { font-size: 1rem; }
 }
+.header-cart {
+  display: grid; position: relative; place-items: center; min-width: 40px; min-height: 40px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
+}
+.header-cart sup { position: absolute; inset-inline-end: -4px; top: -5px; font-size: 11px; line-height: 17px; min-width: 17px; text-align: center; border-radius: 15px; background: var(--accent); color: white; }
+#tab-page.dashboard-page { max-width: none; background: transparent; border: 0; box-shadow: none; padding: 0; }
+.profile-dashboard { display: grid; grid-template-columns: minmax(190px, 230px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.profile-menu, .profile-content { border: 1px solid var(--line); border-radius: 19px; background: var(--surface); box-shadow: var(--shadow); padding: 16px; min-width: 0; }
+.customer-id { display: flex; align-items: center; gap: 10px; padding: 8px 4px 16px; overflow-wrap: anywhere; border-bottom: 1px solid var(--line); }
+.customer-id svg, .bouquet-mark { color: var(--plum); background: var(--hero); border-radius: 12px; }
+.customer-id svg { width: 39px; height: 39px; padding: 9px; }
+.profile-menu nav { display: grid; gap: 3px; margin-block: 10px; width: auto; }
+.profile-menu a { display: flex; gap: 9px; border-radius: 11px; padding: 8px; min-height: 40px; font-size: .88rem; }
+.profile-menu a[aria-current], .order-filters [aria-current] { background: var(--hero); color: var(--text); font-weight: bold; }
+.profile-menu button { font-size: .84rem; }
+.profile-fields { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,180px),1fr)); gap: 10px; }
+.profile-fields div, .address-card, .saved-flower { padding: 12px; border-radius: 13px; background: var(--bg); border: 1px solid var(--line); }
+.profile-fields dt { font-size: .82rem; color: var(--muted); }
+.profile-fields dd { margin: .3rem 0 0; overflow-wrap: anywhere; }
+.address-card, .saved-flower { margin-block: 8px; }
+.address-card p, .saved-flower { display: flex; align-items: center; gap: 10px; overflow-wrap: anywhere; }
+.saved-flower img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; }
+.saved-flower b { margin-inline-start: auto; font-size: .85rem; }
+.order-filters { display: flex; flex-wrap: wrap; gap: 5px; width: auto; }
+.profile-empty, .bouquet-teaser { text-align: center; padding: 24px 10px; }
+.profile-empty svg { margin: 0 auto 12px; width: 32px; height: 32px; color: var(--muted); }
+.bouquet-mark { display: inline-grid; place-items: center; width: 70px; height: 70px; margin-bottom: 14px; border-radius: 24px; box-shadow: var(--shadow); }
+.bouquet-mark svg { width: 42px; height: 42px; }
+.bouquet-teaser p { max-width: 32ch; margin: 10px auto 20px; color: var(--muted); }
+@media (max-width: 680px) {
+  .profile-dashboard { grid-template-columns: 1fr; gap: 10px; }
+  .profile-menu nav { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .profile-menu a { flex-direction: column; justify-content: center; gap: 4px; padding: 5px; font-size: .78rem; }
+  .profile-menu { position: relative; padding: 10px; }
+  .customer-id { padding: 0 0 8px; padding-inline-end: 76px; }
+  .profile-menu [data-logout] { position: absolute; inset-inline-end: 10px; top: 13px; }
+}
 @media print { .app-tabs { display: none; } body { padding: 0; } }

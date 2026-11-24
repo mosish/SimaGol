@@ -1,4 +1,5 @@
 import {state,esc,t,label,price,field,button,select,selectedItems,api,num} from './ui.js';
+import {icon} from './icons.js';
 export function auth() {
   return '<h2>'+label('Account')+'</h2>'+['Login','Register'].map(k=>'<details '+(k==='Login'?'open':'')+'><summary>'+label(k)+'</summary><form data-form="'+k+'">'+
     (k==='Register'?field('name','Name'):'')+field('email','Email','','email')+field('password','Password','','password')+'<small>'+label('Use at least 12 characters')+'</small>'+button(k)+'</form></details>').join('');
@@ -44,13 +45,52 @@ export function notificationList(notices) {
     label('Mark all as read')+'</button>' : '';
   return '<ul>'+entries.join('')+'</ul>'+action;
 }
-export async function account() {
+const sections = [
+  ['personal','Personal details','profile'], ['orders','My orders','orders'],
+  ['addresses','My addresses','pin'], ['favorites','Favorites','heart'], ['notifications','Notifications','bell']
+];
+const statuses=['placed','preparing','shipped','delivered','cancelled'];
+
+function personalPanel() {
+  const {name,email}=state.me;
+  return '<dl class="profile-fields"><div><dt>'+label('Name')+'</dt><dd>'+esc(name)+'</dd></div><div><dt>'+label('Email')+'</dt><dd><bdi>'+esc(email)+'</bdi></dd></div></dl>'+
+    '<details><summary>'+label('Edit details')+'</summary><form data-form="profile">'+field('name','Name',name)+button('Save')+'</form></details>';
+}
+function addressForm(index,value) {
+  return '<form data-form="address"><input type="hidden" name="index" value="'+index+'"><label>'+label('Delivery address')+
+    '<textarea name="address" maxlength="500" required>'+esc(value)+'</textarea></label>'+button('Save')+'</form>';
+}
+function addressPanel() {
+  const addresses=state.me.addresses;
+  return (addresses.map((value,i)=>'<article class="address-card"><p>'+icon('pin')+esc(value)+'</p><details><summary>'+label('Edit')+'</summary>'+
+    addressForm(i,value)+'</details><button type="button" data-delete-address="'+i+'">'+label('Remove')+'</button></article>').join('')||'<p>'+label('No saved addresses')+'</p>')+
+    '<details><summary>'+label('Add address')+'</summary>'+addressForm(-1,'')+'</details>';
+}
+export function orderList(rows,filter) {
+  const filtered=statuses.includes(filter)?rows.filter(o=>o.status===filter):rows;
+  return filtered.map(o=>orderCard(o)).join('')||'<p class="profile-empty">'+icon('orders')+label('No matching orders')+'</p>';
+}
+function orderPanel(rows,filter) {
+  const chips=['all',...statuses].map(s=>'<a class="chip" '+(filter===s?'aria-current="true" ':'')+'href="#account/orders/'+s+'">'+label(s==='all'?'All orders':s)+'</a>').join('');
+  return '<nav class="order-filters" aria-label="'+label('My orders')+'">'+chips+'</nav><section id="history">'+orderList(rows,filter)+'</section>';
+}
+function savedFlowers() {
+  const products=state.catalog.products.filter(p=>state.favorites.includes(p.id));
+  return products.map(p=>'<a class="saved-flower" href="#product/'+esc(p.id)+'"><img src="/'+esc(p.image)+'" alt=""><span>'+esc(p.name[state.lang])+'</span><b>'+esc(price(p.priceIrr))+'</b></a>').join('') || '<p>'+label('No saved flowers')+'</p><a href="/">'+label('Browse flowers')+'</a>';
+}
+export async function account(section='personal',filter='all') {
   if(!state.me) return auth();
-  const [orders,notices]=await Promise.all([api('orders'),api('notifications')]);
-  return '<h2>'+label('Account')+'</h2><p>'+esc(state.me.email)+'</p><form data-form="profile">'+field('name','Name',state.me.name)+
-    '<label>'+label('Saved addresses, one per line')+'<textarea name="addresses">'+esc(state.me.addresses.join('\n'))+'</textarea></label>'+button('Save')+'</form>'+
-    '<h3>'+label('Notifications')+'</h3><section id="notices">'+notificationList(notices)+'</section>'+
-    '<h3>'+label('Order updates')+'</h3><section id="history">'+(orders.map(o=>orderCard(o)).join('')||label('No orders yet'))+'</section><button data-logout>'+label('Log out')+'</button>';
+  const current=sections.find(([key])=>key===section)||sections[0];
+  let panel;
+  if(current[0]==='orders') panel=orderPanel(await api('orders'),statuses.includes(filter)?filter:'all');
+  else if(current[0]==='notifications') panel='<section id="notices">'+notificationList(await api('notifications'))+'</section>';
+  else if(current[0]==='addresses') panel=addressPanel();
+  else if(current[0]==='favorites') panel=savedFlowers();
+  else panel=personalPanel();
+  const links=sections.map(([key,title,glyph])=>'<a '+(key===current[0]?'aria-current="page" ':'')+'href="#account/'+key+'">'+icon(glyph)+label(title)+'</a>').join('');
+  return '<div class="profile-dashboard"><aside class="profile-menu"><div class="customer-id">'+icon('profile')+'<strong>'+esc(state.me.name)+'</strong></div>'+
+    '<nav aria-label="'+label('Account')+'">'+links+'</nav><button data-logout>'+label('Log out')+'</button></aside>'+
+    '<section class="profile-content"><h2>'+label(current[1])+'</h2>'+panel+'</section></div>';
 }
 export function invoice(o) {
   return '<div class="invoice"><h2>'+label('Invoice')+' · SimaGol</h2><p><bdi>'+esc(o.id)+'</bdi> · '+label(o.status)+'</p><p>'+esc(o.recipient)+' · '+esc(o.address)+'</p>'+

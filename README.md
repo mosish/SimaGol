@@ -19,7 +19,7 @@ The working domain is `simagol.com`. Develop against `localhost` and select the 
 
 ## SimaGol PWA
 
-The installed app opens on Home with the newest catalog additions first. The bottom tabs open Home, the shopping list (cart), occasion reminders, and the customer profile. After an online visit the offline shell can display the last viewed public catalog and locally saved dates. Checkout and account data require a connection. [Mobile installation and verification](docs/planner.md)
+The installed app opens on Home with the newest catalog additions first. The bottom tabs open Home, the upcoming bouquet studio, occasion reminders, and the customer profile. The header bag opens the cart. Signed-in customers can switch between personal details, order status filters, saved addresses, favorites and notifications. After an online visit the offline shell can display the last viewed public catalog and locally saved dates. Checkout and account data require a connection. [Mobile installation and verification](docs/planner.md)
 
 [Preview the Persian mobile home screen](docs/mobile-home.png)
 
