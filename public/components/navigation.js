@@ -39,24 +39,35 @@ function createDockSurface(bar){
   const surface=document.createElement('div');
   surface.className='dock-surface';
   surface.setAttribute('aria-hidden','true');
-  // The ends scale to the bar; the moving cutout stays the same size in CSS pixels.
+  // Scale the sloping shoulders to the width, keeping the corners and notch in pixels.
   surface.innerHTML=`<svg width="100%" height="100%" focusable="false">
     <defs>
-      <linearGradient id="dock-petal"><stop stop-color="var(--petal)" stop-opacity=".18"/>
-        <stop offset=".025" stop-color="var(--petal)" stop-opacity=".86"/>
-        <stop offset=".095" stop-color="var(--dock)"/><stop offset=".905" stop-color="var(--dock)"/>
-        <stop offset=".975" stop-color="var(--petal)" stop-opacity=".86"/>
-        <stop offset="1" stop-color="var(--petal)" stop-opacity=".18"/></linearGradient>
+      <linearGradient id="dock-fill">
+        <stop stop-color="var(--dock)" stop-opacity=".95"/>
+        <stop offset=".04" stop-color="var(--dock)"/>
+        <stop offset=".96" stop-color="var(--dock)"/>
+        <stop offset="1" stop-color="var(--dock)" stop-opacity=".95"/>
+      </linearGradient>
       <mask id="dock-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
         <rect width="100%" height="100%" fill="white"/>
-        <path class="dock-cutout" d="M-42 -2 C-30 -2 -29 7 -22 17 C-10 36 10 36 22 17 C29 7 30 -2 42 -2 Z" fill="black"/>
+        <path class="dock-cutout" d="M-60 -3 V0 C-41 0 -34 8 -25 20 C-18 30 -11 35 0 35 C11 35 18 30 25 20 C34 8 41 0 60 0 V-3 Z" fill="black"/>
       </mask>
     </defs>
-    <g mask="url(#dock-cut)">
-      <svg viewBox="0 0 500 57" width="100%" height="100%" preserveAspectRatio="none">
-        <path fill="url(#dock-petal)" d="M0 24 C8 24 8 9 19 4 Q26 0 42 0 H458 Q474 0 481 4 C492 9 492 24 500 24 L498 37 Q496 56 473 57 H27 Q4 56 2 37Z"/>
-      </svg>
-    </g></svg>`;
+    <path class="dock-outline" fill="url(#dock-fill)" mask="url(#dock-cut)"/></svg>`;
+  const outline=surface.querySelector('.dock-outline');
+  function shapeDock(width,height){
+    const shoulder=width*.29;
+    const right=width-shoulder;
+    const bottom=height-15;
+    outline.setAttribute('d',[
+      'M0 25 Q0 17 9 14',                         // Rounded tip into the rising edge.
+      `C25 10 ${shoulder-16} 0 ${shoulder} 0 H${right}`,
+      `C${right+16} 0 ${width-25} 10 ${width-9} 14 Q${width} 17 ${width} 25`,
+      `V${bottom} Q${width} ${height} ${width-16} ${height} H16 Q0 ${height} 0 ${bottom} Z`
+    ].join(' '));
+  }
+  shapeDock(bar.clientWidth,bar.clientHeight);
+  new ResizeObserver(([entry])=>shapeDock(entry.contentRect.width,entry.contentRect.height)).observe(bar);
   const orb=document.createElement('i');
   orb.className='dock-orb';
   orb.setAttribute('aria-hidden','true');
