@@ -1,3 +1,4 @@
+import {dateLocale,inputDate,calendarSystem} from './calendar.js';
 import {state,esc,t,label,price,field,button,select,selectedItems,api,num} from './ui.js';
 import {icon} from './icons.js';
 export function auth() {
@@ -29,13 +30,13 @@ export function checkoutFields(form) {
   document.querySelector('#checkout-total').textContent=t('Total')+' · '+price(total);
 }
 export function orderCard(o,staff=false) {
-  return '<article class="order"><h3>#'+esc(o.id.slice(0,8))+' · '+label(o.status)+'</h3><p><bdi>'+esc(new Intl.DateTimeFormat(state.lang,{dateStyle:'medium',timeZone:'Asia/Tehran'}).format(new Date(o.created)))+'</bdi> · '+esc(price(o.total))+'</p>'+
+  return '<article class="order"><h3>#'+esc(o.id.slice(0,8))+' · '+label(o.status)+'</h3><p><bdi>'+esc(new Intl.DateTimeFormat(dateLocale(state.lang),{dateStyle:'medium',timeZone:'Asia/Tehran'}).format(new Date(o.created)))+'</bdi> · '+esc(price(o.total))+'</p>'+
     (staff?'<p>'+esc(o.recipient)+' · '+esc(o.phone)+'<br>'+esc(o.address)+'</p>':'')+
     '<a href="#invoice/'+esc(o.id)+'">'+label('Invoice')+'</a> '+(staff?'':'<button data-reorder="'+esc(o.id)+'">'+label('Reorder')+'</button>')+'</article>';
 }
 export function notificationList(notices) {
   if (!notices.length) return '<p>'+label('No notifications yet')+'</p>';
-  const format = new Intl.DateTimeFormat(state.lang, {
+  const format = new Intl.DateTimeFormat(dateLocale(state.lang), {
     dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Tehran'
   });
   const entries = notices.map(n => '<li><a href="#invoice/'+esc(n.orderId)+'"><bdi>#'+
@@ -69,9 +70,9 @@ function personalPanel(mode) {
   const {name,email,prefs}=state.me, c=prefs?.contact||{};
   if(mode==='edit') return panelHeading('Edit details')+'<form class="contact-form" data-form="profile">'+
     field('name','Name',name)+field('family','Family name',c.family,'text',false)+field('phone','Mobile number',c.phone,'tel',false)+
-    field('birthday','Birthday',c.birthday,'date',false)+field('city','City',c.city,'text',false)+
+    field('birthday',calendarSystem()==='persian'?'Solar birthday':'Gregorian birthday',inputDate(c.birthday),'text',false)+field('city','City',c.city,'text',false)+
     '<div class="form-actions">'+button('Save')+'<a href="#account/personal">'+label('Cancel edit')+'</a></div></form>';
-  const birthday=c.birthday?new Intl.DateTimeFormat(state.lang,{dateStyle:'medium',timeZone:'UTC'}).format(new Date(c.birthday)):'';
+  const birthday=c.birthday?new Intl.DateTimeFormat(dateLocale(state.lang),{dateStyle:'medium',timeZone:'UTC'}).format(new Date(c.birthday)):'';
   return panelHeading('Personal details',actionLink('#account/personal/edit','Edit details','edit'))+
     '<dl class="profile-fields">'+detailCell('Name',name)+detailCell('Family name',c.family)+detailCell('Mobile number',c.phone)+
     detailCell('Birthday',birthday)+detailCell('Email',email)+detailCell('City',c.city)+'</dl>'+

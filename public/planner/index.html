@@ -51,19 +51,21 @@
     <div class="planner-layout">
       <section class="sheet calendar" id="month" tabindex="-1" aria-labelledby="month-title">
         <div class="section-top"><h2 id="month-title"></h2><div class="month-actions"><button id="previous"></button><button id="today" data-label="today"></button><button id="next"></button></div></div>
-        <label class="region-label"><span data-label="region"></span><select id="region"><option value="IR" data-label="iran"></option><option value="US" data-label="us"></option><option value="IN" data-label="india"></option></select></label>
+        <label class="region-label"><span data-label="system"></span><select id="calendar-system"><option value="persian" data-label="solar"></option><option value="gregory" data-label="gregorian"></option></select></label>
+        <label class="region-label"><span data-label="region"></span><select id="region"><option value="IR" data-label="iran"></option><option value="US" data-label="us"></option></select></label>
         <div id="weekdays" aria-hidden="true" class="weekdays"></div><div id="days" class="days"></div>
         <h3 id="selected-title"></h3><div id="selected"></div>
-        <details class="regional-list"><summary data-label="regionalList"></summary><div id="regional"></div></details>
+        <details class="regional-list"><summary data-label="regionalList"></summary><p id="coverage" class="hint"></p><div id="regional"></div></details>
       </section>
       <aside>
-        <section class="sheet" id="saved"><div class="section-top"><h2 data-label="myDates"></h2></div><div id="entries"></div></section>
+        <section class="sheet" id="saved"><div class="section-top"><h2 data-label="myDates"></h2></div><div id="entries"></div><button id="legacy" hidden data-label="legacy"></button></section>
         <section class="sheet"><div class="section-top"><h2 data-label="reminders"></h2><span id="unread" role="status" aria-live="polite"></span></div><div id="inbox"></div></section>
       </aside>
     </div>
     <section class="sheet preferences" aria-labelledby="pref-heading">
       <h2 id="pref-heading" data-label="settings"></h2>
       <form id="prefs"><label><span data-label="localTime"></span><input id="time" type="time" required></label><label><span data-label="zone"></span><input id="zone" type="text" required placeholder="Asia/Tehran" dir="ltr"></label><label><input type="checkbox" id="follow-zone"><span data-label="followZone"></span></label><button class="minor" data-label="saveSettings"></button></form>
+      <section id="sms-settings" hidden><h3 data-label="smsTitle"></h3><p id="verified"></p><p id="sms-help" class="hint" data-label="smsSetup"></p><form id="sms-phone"><label><span data-label="mobile"></span><input name="phone" dir="ltr" type="tel" required></label><button data-label="sendCode"></button></form><form id="sms-code" hidden><label><span data-label="code"></span><input name="code" dir="ltr" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></label><button data-label="verify"></button></form></section>
       <p class="hint" data-label="deviceHelp"></p><div class="actions"><button id="install-app" class="minor" data-label="install"></button><button id="enable-push" class="minor" data-label="enable"></button><button id="disable-push" class="minor" data-label="disable"></button></div>
     </section>
   </main>
@@ -72,11 +74,12 @@
     <div class="section-top"><h2 id="form-title"></h2><button type="button" id="cancel" class="minor" data-label="close"></button></div>
     <label><span data-label="kind"></span><select name="type"><option value="birthday" data-label="birthday"></option><option value="anniversary" data-label="anniversary"></option><option value="custom" data-label="custom"></option><option value="occasion" data-label="flowerOccasion"></option></select></label>
     <label><span data-label="name"></span><input name="name" required maxlength="120" autocomplete="off"></label>
-    <label><span data-label="date"></span><input name="date" type="date" required min="1900-01-01" max="2100-12-31"></label>
+    <label><span data-label="date"></span><input name="date" type="text" dir="ltr" required maxlength="10" placeholder="1405/01/01"></label>
     <label><input type="checkbox" name="annual"><span data-label="annual"></span></label>
     <label><span data-label="recipient"></span><input name="recipient" maxlength="140"></label>
     <label><span data-label="lead"></span><input name="daysBefore" type="number" min="0" max="365" step="1" required></label>
     <p id="holiday-lead" class="hint" hidden data-label="holidayLead"></p>
+    <label id="sms-option" hidden><input type="checkbox" name="sms"><span data-label="smsOption"></span></label>
     <label><span data-label="notes"></span><textarea name="notes" maxlength="1000"></textarea></label>
     <label><span data-label="link"></span><input name="link" type="url" maxlength="2048" placeholder="https://" dir="ltr"></label>
     <p id="form-error" role="alert"></p><button class="cta" type="submit" data-label="save"></button>

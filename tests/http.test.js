@@ -24,6 +24,8 @@ test('store API and authenticated customer journey', async () => {
   }
   try {
     assert.equal((await call('GET','/api/admin'))[0],401);
+    assert.equal((await call('GET','/api/planner'))[0],401);
+    assert.equal((await call('POST','/api/planner/save',{}))[0],401);
     assert.equal((await call('POST','/api/login',{}, {origin:'https://other.example'}))[0],403);
     const [,shop]=await call('GET','/api/store');
     assert.equal(shop.catalog.products.length,4);

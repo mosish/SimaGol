@@ -6,8 +6,8 @@ function applicationKey(value) {
 
 // Project only scheduling data. Personal names, notes and florist URLs stay local.
 export function scheduleForPush(snapshot) {
-  const events=snapshot.entries.map(({id,kind,date,annual,daysBefore,holidayId})=>({
-    id,kind,date,annual,daysBefore,...(holidayId?{holidayId}:{})
+  const events=snapshot.entries.map(({id,kind,date,annual,daysBefore,holidayId,calendar})=>({
+    id,kind,date,annual,daysBefore,...(calendar?{calendar}:{}),...(holidayId?{holidayId}:{})
   }));
   return {timeZone:snapshot.timeZone,time:snapshot.time,events};
 }
@@ -38,7 +38,7 @@ export async function initDevice({getSnapshot,onMessage}) {
     say('زمان‌بندی اعلان هنوز همگام نشده است. تقویم روی دستگاه ذخیره است. هنگام اتصال دوباره تلاش می‌شود.',
       'Push scheduling has not synced. Your dates are saved locally. Reopen online to retry.');
   async function syncNow(){
-    if(!subscription || !navigator.onLine)return;
+    if(!subscription || !navigator.onLine || getSnapshot().authenticated===false)return;
     await request('sync',{endpoint:subscription.endpoint,...scheduleForPush(getSnapshot())});
   }
   function sync(){
@@ -47,6 +47,7 @@ export async function initDevice({getSnapshot,onMessage}) {
   }
   controls();
   enable.onclick=async()=>{
+    if(getSnapshot().authenticated===false){say('ابتدا وارد حساب خود شوید.','Sign in to enable reminders.');return;}
     if(!registration || !('PushManager' in window) || !('Notification' in window)){
       say('یادآورها داخل تقویم فعال‌اند. برای اعلان پس‌زمینه در آیفون، برنامه را به صفحهٔ اصلی اضافه کن و از همان‌جا باز کن.',
         'In-app reminders are active. On iPhone, install and open the Home Screen app for background notifications.');

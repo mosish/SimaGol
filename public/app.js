@@ -6,7 +6,7 @@ import { renderNavigation } from './components/navigation.js';
 import { collection, product, bagView } from './components/store.js';
 import { account, checkout, checkoutFields, invoice, orderList, notificationList, addressDetails, deliveryText } from './components/account.js';
 import { showHomepage } from './components/home.js';
-import { admin } from './components/admin.js';
+import {calendarSystem,readDate} from './components/calendar.js';
 
 const modal=$('#panel');
 const content=$('#panel-body');
@@ -45,7 +45,7 @@ function appearance() {
   $('.seal').hidden=!logo.hidden;
   if(!logo.hidden) logo.src='/'+state.settings.logo;
   showHomepage();
-  $('#staff-link').hidden=!state.me||state.me.role==='customer';
+  $('#calendar').textContent=calendarSystem()==='persian'?t('Solar calendar'):t('Gregorian calendar');
   collection();
 }
 function closeView() {
@@ -56,7 +56,7 @@ function closeView() {
 function activeTab(hash) {
   if (hash==='#bag'||hash==='#checkout') return 'bag';
   if (hash==='#bouquet') return 'bouquet';
-  if (hash==='#account'||hash.startsWith('#account/')||hash==='#admin'||hash.startsWith('#invoice/')) return 'profile';
+  if (hash==='#account'||hash.startsWith('#account/')||hash.startsWith('#invoice/')) return 'profile';
   return 'home';
 }
 function updateTabs() {
@@ -92,7 +92,7 @@ async function route() {
     else if(h==='#checkout'){returnTo='#checkout';html=checkout();}
     else if(profilePage){returnTo=h;html=await account(...h.split('/').slice(1));}
     else if(h==='#bouquet') html='<section class="bouquet-teaser"><span class="bouquet-mark">'+icon('bouquet')+'</span><h2>'+label('Bouquet studio')+'</h2><strong>'+label('Coming soon')+'</strong><p>'+label('Bouquet studio description')+'</p><a class="cta" href="/">'+label('Browse flowers')+'</a></section>';
-    else if(h==='#admin') html=await admin();
+
     else if(h.startsWith('#invoice/')) html=invoice(await api('orders/'+encodeURIComponent(h.slice(9))));
     else {
       const p=state.catalog.products.find(o=>h==='#product/'+o.id);
@@ -139,6 +139,7 @@ async function preference() {
   if(state.me) await api('profile','POST',{prefs:{lang:state.lang,dark:state.dark}});
 }
 $('#language').onclick=()=>{state.lang=state.lang==='fa'?'en':'fa';preference().catch(e=>notify(t(e.message)));};
+$('#calendar').onclick=()=>{localStorage.setItem('simagol.calendar',calendarSystem()==='persian'?'gregory':'persian');appearance();route();};
 $('#theme').onclick=()=>{state.dark=!state.dark;preference().catch(e=>notify(t(e.message)));};
 $('#favorites').onclick=()=>{state.category='all';$('#search').value='';location.hash=location.hash==='#favorites'?'catalog':'favorites';$('#catalog').scrollIntoView();collection();};
 setupInstall($('#install-app'),(fa,en)=>notify(state.lang==='fa'?fa:en));
@@ -179,7 +180,7 @@ async function act(b) {
     if(location.hash==='#bag')await route();else location.hash='bag';return;
   }
   if(b.hasAttribute('data-logout')){
-    await api('logout','POST',{});await refresh();location.hash='account';await route();return;
+    await api('logout','POST',{});localStorage.removeItem('simagol.planner.viewer');await refresh();location.hash='account';await route();return;
   }
   if(b.dataset.reorder){
     const o=await api('orders/'+b.dataset.reorder);await refresh();
@@ -205,29 +206,18 @@ document.addEventListener('change',e=>{
     }
     checkoutFields(f);
   }
-  if(f.dataset.form==='copy'&&e.target.name==='key'){
-    const pair=state.settings.copy[e.target.value]||state.dict[e.target.value];
-    f.elements.copyFa.value=pair.fa;f.elements.copyEn.value=pair.en;
-  }
 });
 
-function fileData(file) {
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(String(reader.result).split(',')[1]);
-    reader.onerror=()=>reject(new Error('Invalid image'));
-    reader.readAsDataURL(file);
-  });
-}
 async function submit(form) {
   const k=form.dataset.form;
   const data=Object.fromEntries(new FormData(form));
   for(const el of form.querySelectorAll('[type=checkbox]'))data[el.name]=el.checked;
   if(k==='Register'||k==='Login'){
     await api(k.toLowerCase(),'POST',data);
-    await refresh();if(location.hash!==returnTo)location.hash=returnTo;
+    await refresh();if(location.hash==='#account/planner-login'){location.assign('/planner/');return;}if(location.hash!==returnTo)location.hash=returnTo;
   } else if(k==='profile'){
     const {name,...contact}=data;
+    if(contact.birthday){contact.birthday=readDate(contact.birthday);if(!contact.birthday)throw new Error('Invalid date');}
     await api('profile','POST',{name,contact});location.hash='account/personal';
     await refresh();
   } else if(k==='referral'){
@@ -255,12 +245,6 @@ async function submit(form) {
     const o=await api('orders','POST',{...data,slot:data.slot||'',items,expectedTotal,key:idempotency.key});
     state.bag={};persist('bag',{});idempotency={};persist('lastCheckout',{});
     location.hash='invoice/'+o.id;await refresh();
-  } else if(k==='upload'){
-    if(data.file.size>2097152)throw new Error('File too large');
-    const out=await api('admin/upload','POST',{data:await fileData(data.file)});
-    $('#upload-path').textContent=out.path;return;
-  } else {
-    await api('admin/'+k,'POST',data);await refresh();
   }
   await route();
 }

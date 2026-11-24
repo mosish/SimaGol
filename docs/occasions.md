@@ -4,31 +4,11 @@ A birthday saved as February 29 stays a date in the member's calendar. The plann
 
 ## Regional presets
 
-Iran offers two Solar Hijri occasions. US and India each offer seven gift-giving observances, including common cultural dates. The selected region controls suggestions, and the member's IANA time zone controls the reminder hour. Staff set opening hours and delivery capacity separately.
+The default calendar is Solar Hijri in both UI languages. Changing the display to Gregorian preserves the saved civil date. Birthday recurrence follows the calendar used at creation. Old personal entries retain their Gregorian anniversaries.
 
-| Iranian occasion | Solar Hijri date | Gregorian 2024 | Gregorian 2025 |
-| --- | --- | --- | --- |
-| نوروز · Nowruz | 1 Farvardin | March 20 | March 21 |
-| روز پزشک · Iranian Physicians' Day | 1 Shahrivar | August 22 | August 23 |
+The bundled Iran list includes 445 official observance rules in the 1405 edition. The month view combines solar dates, Iranian-observed lunar dates, fixed Gregorian dates and weekday-based observances. A day can contain several occasions. Historical one-off rules retain their year. The confirmed Iranian lunar table is limited to the end of 1405. Update the source rules and month lengths for the next official edition before scheduling lunar occasions beyond that date. US observances remain available in the regional selector. Older saved India entries retain their recurrence rules.
 
-For each requested Gregorian year, the runtime converts dates with Intl's Persian calendar. A saved Iranian occasion follows its Solar Hijri date the next year. For Iranian lunar observances, choose **Custom occasion**, enter the confirmed Gregorian date for that year and leave annual repetition off. Enter the following year's confirmed occurrence separately. [Nowruz in the Iranian calendar](https://www.iranicaonline.org/articles/nowruz-iii/) · [Physicians' Day on 1 Shahrivar](https://en.ifilmtv.ir/News/Content/45387/)
-
-| Occasion | United States | India |
-| --- | --- | --- |
-| Valentine's Day | February 14 | February 14 |
-| International Women's Day | March 8 | March 8 |
-| Doctors' Day | March 30 | July 1 |
-| Nurses Day | May 6, National Nurses Day | May 12, International Nurses Day |
-| Mother's Day | Second Sunday in May | Second Sunday in May |
-| Father's Day | Third Sunday in June | Third Sunday in June |
-| Teacher Day | Tuesday following the first Monday in May | September 5 |
-
-**Date references**
-
-- US Mother's Day and Father's Day follow federal observance rules. [36 USC §117](https://www.govinfo.gov/content/pkg/USCODE-2024-title36/html/USCODE-2024-title36-subtitleI-partA-chap1-sec117.htm) · [36 USC chapter 1, §109](https://www.govinfo.gov/content/pkg/USCODE-2024-title36/html/USCODE-2024-title36-subtitleI-partA-chap1.htm)
-- US professional observances follow the published dates of the health department and professional associations. Teacher Day falls during Teacher Appreciation Week; in a year where May begins on Tuesday, it falls on May 8. [Doctors' Day](https://www.health.ny.gov/press/releases/2024/2024-03-29_commissioner_statement.htm) · [Nurses Week](https://www.nursingworld.org/nnw) · [Teacher Appreciation Week](https://www.nea.org/TAW)
-- For India, consult the Ministry of Health's health-day calendar, the Press Information Bureau's explanation of Teachers' Day and the Indian observance calendar for common family occasions. [Health calendar](https://cbhidghs.mohfw.gov.in/WriteReadData/l892s/Cover.pdf) · [Teachers' Day](https://www.pib.gov.in/PressNoteDetails.aspx?ModuleId=3&NoteId=152100&lang=1&reg=3) · [Indian calendar](https://www.drikpanchang.com/calendars/indian/indiancalendar.html?lang=en)
-- Shared cultural dates reflect the February 14 tradition and the UN's March 8 observance. [Library of Congress](https://www.loc.gov/item/today-in-history/february-14/) · [United Nations](https://www.un.org/en/observances/international-womens-day)
+Sources: [Iranian Calendar Center](https://calendar.ut.ac.ir/documents/2139738/7092644/Calendar-1405.pdf), [CC0 event definitions](https://github.com/persian-calendar/events), [Iranian lunar month records](https://github.com/persian-calendar/calendar/blob/main/src/commonMain/kotlin/io/github/persiancalendar/calendar/islamic/IranianIslamicDateConverter.kt).
 
 ## Scheduling policy
 

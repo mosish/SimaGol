@@ -29,8 +29,8 @@ export function newPlanner(now = new Date()) {
   };
 }
 
-export function loadPlanner(storage, now = new Date()) {
-  const raw = storage.getItem(storageKey);
+export function loadPlanner(storage, now = new Date(), owner) {
+  const raw = storage.getItem(owner?storageKey+"."+owner:storageKey);
   if (raw === null) return newPlanner(now);
   const value = JSON.parse(raw);
   if (value?.version !== 1 || !Array.isArray(value.entries) || !value.entries.every(validEntry) ||
@@ -41,8 +41,8 @@ export function loadPlanner(storage, now = new Date()) {
   return value;
 }
 
-export function savePlanner(storage, state) {
-  storage.setItem(storageKey,JSON.stringify(state));
+export function savePlanner(storage, state,owner) {
+  storage.setItem(owner?storageKey+"."+owner:storageKey,JSON.stringify(state));
 }
 
 export function upsert(state, entry) {

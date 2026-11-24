@@ -695,5 +695,12 @@
   "Occasion planner": {
     "fa": "تقویم مناسبت‌ها",
     "en": "Occasion planner"
-  }
+  },
+  "Solar calendar": {"en": "Solar calendar", "fa": "شمسی"},
+  "Gregorian calendar": {"en": "Gregorian calendar", "fa": "میلادی"},
+  "Solar birthday": {"en": "Solar birthday", "fa": "تولد شمسی (سال/ماه/روز)"},
+  "Gregorian birthday": {"en": "Gregorian birthday", "fa": "تولد میلادی (سال/ماه/روز)"},
+  "End date": {"en": "End date", "fa": "تاریخ پایان (سال/ماه/روز)"},
+  "End time UTC": {"en": "End time UTC", "fa": "ساعت پایان (UTC)"},
+  "Invalid date": {"en": "Invalid date", "fa": "تاریخ واردشده معتبر نیست"}
 }

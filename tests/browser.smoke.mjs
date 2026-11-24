@@ -85,12 +85,13 @@ try {
   await login.locator('[name=password]').fill(staffPassword);
   await login.locator('[type=submit]').click();
   await page.locator('[data-logout]').waitFor();
-  await page.locator('#staff-link').click();
+  assert.equal(await page.locator('#staff-link').count(),0);
+  await page.goto(origin+'/admin');
   const status=page.locator('[data-form="status"]').first();
   await status.locator('[name=status]').selectOption('preparing');
   await status.locator('[type=submit]').click();
   await page.waitForFunction(()=>document.querySelector('[data-form="status"] select')?.value==='shipped');
-  await page.locator('.close').click();
+  await page.goto(origin+'/');
   for (const width of [375,768,1440]) {
     await page.setViewportSize({width,height:850});
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'horizontal overflow at '+width+'px');

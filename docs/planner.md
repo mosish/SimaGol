@@ -24,11 +24,11 @@ Use **http://localhost:3000/planner/** on the development computer. For testing 
 
 - Choose a date in the month view, then add a birthday, anniversary, personal custom date, or flower-order occasion. Record a recipient, note or florist URL. The entry list provides edit and delete controls.
 - Personal dates have a configurable lead in days. One day and one week correspond to 1 and 7. A flower-order occasion always generates both a three-day notice and a one-day notice.
-- Select a region and choose a suggested occasion. The preset retains its rule, so a saved US Mother's Day moves to the second Sunday of May in each new year. Iran, India and US presets and their sources are documented in [occasions.md](occasions.md).
+- Select a region and choose a suggested occasion. The preset retains its rule, so a saved US Mother's Day moves to the second Sunday of May in each new year. Iran and US presets and their sources are documented in [occasions.md](occasions.md).
 - Civil dates are stored as Gregorian YYYY-MM-DD. Default reminder time is 09:00 in the detected device zone. You can pin a different IANA zone, such as Asia/Tehran. A February 29 annual entry uses February 28 in non-leap years. For a daylight-saving gap the time moves forward by the gap. For a repeated clock time the earlier instant wins.
-- Each browser profile keeps its own planner in localStorage. Clearing site data removes it. On some devices the Home Screen installation has separate storage from a browser tab. Add the app to the Home Screen before entering your real dates there.
+- The server stores each member’s events and notes. A scoped browser cache supports offline access after sign-in. Legacy, unowned entries can be imported explicitly by their owner. On some devices the Home Screen installation has separate storage from a browser tab. Add the app to the Home Screen before entering your real dates there.
 - While visible, the planner checks every 30 seconds. Opening it later adds missed reminders to the inbox. A stable identifier per entry, occurrence and lead prevents duplicate inbox rows.
-- With network access, sign in to the shop and enable device notifications in the planner. Only the endpoint and schedule fields are submitted. Names, notes, recipients and florist links stay on the device. The lock-screen message opens the planner for details.
+- With network access, sign in to the shop and enable device notifications in the planner. The push subscription sends scheduling fields. Member event records and notes are separately stored in the account database. The lock-screen message opens the planner for details.
 - Offline edits take effect locally immediately. The server keeps the last synced schedule until the planner reconnects. When travelling, open the app online to update a schedule that follows the device zone.
 
 ## Install and acceptance checks
@@ -62,3 +62,9 @@ server/push.js     Persistent scheduler and VAPID sender
 scripts/build.js   Versioned deployable release
 tests/             Date, storage, push, shell and mobile browser checks
 ```
+
+## SMS setup
+
+Set KAVENEGAR_API_KEY, SMS_OTP_TEMPLATE and SMS_REMINDER_TEMPLATE on the host and restart the Node service. Both provider-approved lookup templates take one token. The verification template uses a six-digit code. The reminder template uses the number of calendar days before the occasion (0 means today). Members verify their own number and enable SMS on individual events. Each account and address can request at most five codes in 24 hours. Verification expires after five minutes.
+
+A single running Node instance scans every 30 seconds and can catch up one hour after downtime. Confirm a real delivery on the deployment host. Provider timeouts are recorded as unconfirmed to avoid sending duplicates. Back up the SQLite database, which contains private planner data. Keep the provider key on the server.

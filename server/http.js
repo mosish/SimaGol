@@ -1,3 +1,4 @@
+import {initPlanner,plannerInfo,changePlanner} from './planner.js';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { isIP } from 'node:net';
@@ -42,8 +43,8 @@ async function media(dir, data) {
   return {path:'uploads/'+name};
 }
 
-export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy,pushCredentials=null}) {
-  initPush(db);
+export function createHandler({db,dir,origin,production,ordersEnabled,trustedProxy,pushCredentials=null,sms=null}) {
+  initPush(db);initPlanner(db);
   const attempts=new Map();
   function throttle(ip) {
     const now=Date.now();
@@ -74,12 +75,13 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
         if(!['GET','HEAD'].includes(method)) fail(405,'Method unavailable');
         if(path==='/planner'){res.statusCode=308;res.setHeader('Location','/planner/');res.end();return;}
         if(path==='/planner/sw.js') res.setHeader('Service-Worker-Allowed','/');
-        const plannerFile=/^\/planner\/(?:|index\.html|manifest\.json|(?:app|dates|store|device|sw)\.js|planner\.css|images\/(?:icon-(?:192|512)|apple-touch|launch-[0-9]+x[0-9]+)\.png)$/.test(path);
-        const unknownPage=!plannerFile && path!=='/' && path!=='/index.html' && req.headers.accept?.includes('text/html') &&
+        const plannerFile=/^\/planner\/(?:|index\.html|manifest\.json|(?:app|dates|iran|store|device|sw)\.js|planner\.css|images\/(?:icon-(?:192|512)|apple-touch|launch-[0-9]+x[0-9]+)\.png)$/.test(path);
+        const staffPage=['/admin','/admin/'].includes(path);
+        const unknownPage=!staffPage && !plannerFile && path!=='/' && path!=='/index.html' && req.headers.accept?.includes('text/html') &&
           !/^\/(?:images|uploads|components)\//.test(path);
-        const filename=path==='/'||unknownPage?'index.html':path==='/planner/'?'planner/index.html':path.slice(1);
+        const filename=staffPage?'admin.html':path==='/'||unknownPage?'index.html':path==='/planner/'?'planner/index.html':path.slice(1);
         if(unknownPage)res.statusCode=404;
-        if(!plannerFile && !/^(index\.html|shop\.css|app\.js|labels\.json|components\/[a-z]+\.js|images\/[a-z]+\.jpg|uploads\/[a-f0-9]{64}\.(png|jpg|webp))$/.test(filename)) fail(404,'Page not found');
+        if(!staffPage && !plannerFile && !/^(index\.html|shop\.css|app\.js|labels\.json|components\/[a-z]+\.js|images\/[a-z]+\.jpg|uploads\/[a-f0-9]{64}\.(png|jpg|webp))$/.test(filename)) fail(404,'Page not found');
         const bytes=await readFile(join(filename.startsWith('uploads/')?dir:publicDir,filename)).catch(()=>fail(404,'Page not found'));
         res.setHeader('Content-Type',types[extname(filename)]);
         res.end(method==='HEAD'?undefined:bytes);
@@ -93,6 +95,7 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
         if(roles&&!roles.includes(user.role)) fail(403,'Access denied');
       };
       if(method==='GET') {
+        if(key==='planner'){permit();return send(plannerInfo(db,user.id,sms));}
         if(key==='push/config') return send({enabled:!!pushCredentials,publicKey:pushCredentials?.publicKey||null});
         if(key==='health') {db.prepare('SELECT 1').get();return send({ok:true});}
         if(key==='store') return send({catalog:catalog(db),settings:{...settings(db),ordersEnabled}});
@@ -135,6 +138,7 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
       }
       if(key==='logout') {logout(db,token);cookie('',0);return send({ok:true});}
       permit();
+      if(key.startsWith('planner/')) return send(await changePlanner(db,user.id,key.slice(8),b,sms));
       if(key==='push/delete') return send(deletePush(db,user.id,b));
       if(key==='push/sync') {
         if(!pushCredentials) fail(503,'Background reminders unavailable');

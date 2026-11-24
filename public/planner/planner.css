@@ -54,3 +54,5 @@ select, #prefs input { font: inherit; color: var(--text); background: var(--bg);
   .days { gap: .16rem; }
   .days button { min-height: 40px; border-radius: 8px; }
 }
+
+[hidden]{display:none !important;}

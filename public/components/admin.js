@@ -1,3 +1,4 @@
+import {inputDate} from './calendar.js';
 import {state,esc,t,label,api,field,select,button} from './ui.js';
 import {homepageForm} from './home.js';
 import {orderCard} from './account.js';
@@ -31,7 +32,7 @@ export async function admin() {
     html+='<details><summary>'+label('Delivery settings')+'</summary><form data-form="delivery">'+Object.entries(settings.delivery).map(([key,v])=>
       '<label><input type="checkbox" name="'+key+'On" '+(v.enabled?'checked':'')+'> '+label(key)+'</label>'+field(key+'Fee','Fee in rial',v.fee,'number')).join('')+
       field('wrapFee','Gift wrap fee in rial',settings.wrapFee,'number')+button('Save')+'</form><h3>'+label('Time slots')+'</h3>'+
-      settings.slots.concat([{id:'',label:{},capacity:1,ends:''}]).map(s=>'<form data-form="slot"><input type="hidden" name="id" value="'+esc(s.id)+'">'+bilingual('name','Time slot',s.label)+field('ends','End time (UTC ISO)',s.ends)+field('capacity','Capacity',s.capacity,'number')+button('Save')+'</form>').join('')+'</details>';
+      settings.slots.concat([{id:'',label:{},capacity:1,ends:''}]).map(s=>'<form data-form="slot"><input type="hidden" name="id" value="'+esc(s.id)+'">'+bilingual('name','Time slot',s.label)+field('endDate','End date',inputDate(s.ends?.slice(0,10)))+field('endTime','End time UTC',s.ends?.slice(11,16),'time')+field('capacity','Capacity',s.capacity,'number')+button('Save')+'</form>').join('')+'</details>';
   }
   if(owner) html+='<details><summary>'+label('Customers and roles')+'</summary>'+data.clients.map(c=>'<section><b>'+esc(c.name)+'</b><div>'+esc(c.email)+'</div>'+
     (data.orders||[]).filter(o=>o.userId===c.id).map(o=>'<a href="#invoice/'+esc(o.id)+'">#'+esc(o.id.slice(0,8))+'</a> ').join('')+

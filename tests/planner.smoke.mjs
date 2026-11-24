@@ -48,6 +48,17 @@ try {
   const editor=page.locator('#event-form');
   const input=key=>editor.locator('[name="'+key+'"]');
   await page.locator('#new').click();
+  await page.waitForURL('**/#account/planner-login');
+  await page.locator('summary').filter({hasText:'Register'}).click();
+  const registration=page.locator('[data-form="Register"]');
+  await registration.locator('[name=name]').fill('Planner member');
+  await registration.locator('[name=email]').fill('planner@example.test');
+  await registration.locator('[name=password]').fill('test-only-flower-planner');
+  await registration.locator('[type=submit]').click();
+  await page.waitForURL('**/planner/');
+  await page.waitForFunction(()=>document.querySelector('#new').textContent==='Add an occasion');
+  await page.locator('#calendar-system').selectOption('gregory');
+  await page.locator('#new').click();
   await input('type').selectOption('birthday');
   await input('name').fill('Birthday smoke');
   await input('date').fill('2028-06-11');
@@ -64,18 +75,19 @@ try {
   await editor.locator('[type=submit]').click();
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
 
-  await page.locator('#region').selectOption('IN');
+  await page.locator('#region').selectOption('US');
+  await page.locator('#previous').click();
   await page.locator('.regional-list summary').click();
-  await page.locator('[data-choose="in-doctors"]').click();
+  await page.locator('[data-choose^="us-mothers@"]').click();
   assert.ok(await input('annual').isDisabled());
   assert.ok(await page.locator('#holiday-lead').isVisible());
   await editor.locator('[type=submit]').click();
-  await entries.getByRole('heading',{name:"National Doctors' Day"}).waitFor();
+  await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
 
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded'});
   await birthday.getByText('Choose roses',{exact:true}).waitFor();
-  assert.equal(await page.locator('#region').inputValue(),'IN');
+  assert.equal(await page.locator('#region').inputValue(),'US');
   const nextDate=await page.locator('#month-title').textContent();
   await page.locator('#next').click();
   assert.notEqual(await page.locator('#month-title').textContent(),nextDate);
@@ -83,7 +95,7 @@ try {
   await page.locator('#remove').click();
   await birthday.waitFor({state:'detached'});
   await page.reload({waitUntil:'domcontentloaded'});
-  await entries.getByRole('heading',{name:"National Doctors' Day"}).waitFor();
+  await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
   assert.equal(await birthday.count(),0);
   await page.locator('[data-tab="home"]').click();
   await page.locator('[data-tab="home"][aria-current="page"]').waitFor();
@@ -92,9 +104,12 @@ try {
   await page.locator('.header-cart').click();
   await page.locator('#tab-page h2').waitFor();
   await page.locator('[data-tab="bell"]').click();
-  await entries.getByRole('heading',{name:"National Doctors' Day"}).waitFor();
+  await entries.getByRole('heading',{name:"Mother's Day"}).waitFor();
+  await context.setOffline(false);
+  await page.reload();
+  await page.waitForFunction(async()=>(await (await fetch('/api/planner')).json()).entries.every(e=>e.name!=='Birthday smoke'));
   assert.deepEqual(pageErrors,[]);
-  console.log('Mobile Chromium verified planner CRUD, Iran/India selection, standalone manifest, offline reload and offline edits.');
+  console.log('Mobile Chromium verified planner CRUD, Solar/Gregorian selection and authenticated saves, standalone manifest, offline reload and offline edits.');
 } finally {
   await browser?.close();
   if(server.listening) {

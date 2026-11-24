@@ -4,6 +4,49 @@ const DAY = 86400000;
 const pad = n => String(n).padStart(2, '0');
 const isoDay = (year, month, day) => `${year}-${pad(month)}-${pad(day)}`;
 
+import {iranRules,lunarYearMasks} from './iran.js';
+import {calendarParts,addDays,monthStart,monthLength} from '../components/calendar.js';
+const iran = iranRules.map(rule=>({...rule,region:'IR',name:{fa:rule.title,en:rule.title}}));
+const lunarMonths=[];
+let stamp=(2396005-2440588)*DAY;
+for(const [year,mask] of lunarYearMasks.entries()){
+  for(let month=1;month<=12;month++){
+    const length=29+((mask>>(12-month))&1);
+    lunarMonths.push({year:year+1264,month,start:new Date(stamp).toISOString().slice(0,10),length});
+    stamp+=length*DAY;
+  }
+}
+const yearCache=new Map();
+function iranYear(year) {
+  if(yearCache.has(year))return yearCache.get(year);
+  const result=new Map();
+  for(const rule of iran){
+    let months=[];
+    if(rule.calendar==='Hijri'){
+      months=lunarMonths.filter(m=>m.month===rule.month && Math.abs(Number(m.start.slice(0,4))-year)<=1);
+    }else{
+      const sys=rule.calendar==='Persian'?'persian':'gregory';
+      const years=sys==='persian'?[year-622,year-621]:[year];
+      months=years.map(y=>({year:y,start:monthStart(y,rule.month,sys),length:monthLength(y,rule.month,sys)}));
+    }
+    for(const m of months){
+      let day=rule.day;
+      const weekday=(rule.weekday+6)%7;
+      if(rule.rule==='single event' && rule.year!==m.year)continue;
+      if(rule.rule==='end of month')day=m.length;
+      if(rule.rule==='nth weekday of month')day=1+(weekday-new Date(m.start).getUTCDay()+7)%7+(rule.nth-1)*7;
+      if(rule.rule==='last weekday of month')day=m.length-(new Date(addDays(m.start,m.length-1)).getUTCDay()-weekday+7)%7+(rule.offset||0);
+      if(!day || day>m.length)continue;
+      const date=addDays(m.start,day-1);
+      if(!date.startsWith(year+'-') || (rule.calendar==='Hijri' && date>'2027-03-20'))continue;
+      if(!result.has(rule.id))result.set(rule.id,[]);
+      result.get(rule.id).push(date);
+    }
+  }
+  yearCache.set(year,result);
+  return result;
+}
+
 const common = [
   ['valentines', "Valentine's Day", 'روز ولنتاین', { month: 2, day: 14 }],
   ['women', "International Women's Day", 'روز جهانی زن', { month: 3, day: 8 }],
@@ -23,45 +66,18 @@ const regional = {
     ['nurses', 'International Nurses Day', 'روز جهانی پرستار', { month: 5, day: 12 }],
     ['teachers', "Teachers' Day", 'روز معلم', { month: 9, day: 5 }]
   ],
-  IR: [
-    ['nowruz', 'Nowruz', 'نوروز', { month: 3, persianMonth: 1, persianDay: 1 }],
-    ['doctors', "Iranian Physicians' Day", 'روز پزشک', { month: 8, persianMonth: 6, persianDay: 1 }]
-  ]
+
 };
-export const HOLIDAYS = Object.entries(regional).flatMap(([region, rows]) =>
+export const HOLIDAYS = iran.concat(Object.entries(regional).flatMap(([region, rows]) =>
   rows.map(([slug, en, fa, rule]) => ({
     id: `${region.toLowerCase()}-${slug}`, region, name: { en, fa }, ...rule
   }))
-);
+));
 const byId = new Map(HOLIDAYS.map(rule => [rule.id, rule]));
-const solarDates = new Map();
-const persian = new Intl.DateTimeFormat('en', {
-  calendar: 'persian', numberingSystem: 'latn', timeZone: 'UTC', month: 'numeric', day: 'numeric'
-});
-
-function persianOccurrence(rule, year) {
-  const key = `${rule.id}/${year}`;
-  if (solarDates.has(key)) return solarDates.get(key);
-  if (persian.resolvedOptions().calendar !== 'persian') throw new RangeError('Persian calendar unavailable');
-  const start = Date.UTC(year, rule.month - 1, 1);
-  const end = Date.UTC(year, rule.month, 1);
-  for (let at = start; at < end; at += DAY) {
-    const parts = persian.formatToParts(at);
-    const month = Number(parts.find(p => p.type === 'month').value);
-    const day = Number(parts.find(p => p.type === 'day').value);
-    if (month === rule.persianMonth && day === rule.persianDay) {
-      const date = new Date(at).toISOString().slice(0, 10);
-      solarDates.set(key, date);
-      return date;
-    }
-  }
-  return null;
-}
-
 export function holidayDate(id, year) {
   const rule = byId.get(id);
   if (!rule || !Number.isInteger(year) || year < 1000 || year > 9999) return null;
-  if (rule.persianMonth) return persianOccurrence(rule, year);
+  if (rule.region==='IR') return iranYear(year).get(id)?.[0]||null;
   if (rule.day) return isoDay(year, rule.month, rule.day);
   const firstWeekday = new Date(Date.UTC(year, rule.month - 1, 1)).getUTCDay();
   const day = 1 + (rule.weekday - firstWeekday + 7) % 7 + 7 * (rule.nth - 1) + (rule.extraDays || 0);
@@ -76,31 +92,37 @@ function parseDay(date) {
   return { year, month, day, stamp };
 }
 
-function occurrence(event, year) {
-  const original = parseDay(event.date);
-  if (!original || year < original.year) return null;
-  if (event.holidayId) {
-    const date = holidayDate(event.holidayId, year);
-    return date && date >= event.date ? date : null;
-  }
-  if (!event.annual) return original.year === year ? event.date : null;
-  const lastDay = new Date(Date.UTC(year, original.month, 0)).getUTCDate();
-  return isoDay(year, original.month, Math.min(original.day, lastDay));
+function holidayDates(id,year) {
+  if(byId.get(id)?.region==='IR')return iranYear(year).get(id)||[];
+  const date=holidayDate(id,year);return date?[date]:[];
 }
-
+function occurrences(event,year) {
+  const original=parseDay(event.date);
+  if(!original||year<original.year)return [];
+  if(event.holidayId)return holidayDates(event.holidayId,year).filter(d=>d>=event.date);
+  if(!event.annual)return original.year===year?[event.date]:[];
+  if(event.calendar==='persian'){
+    const [,m,d]=calendarParts(event.date,'persian');
+    return [year-622,year-621].map(y=>addDays(monthStart(y,m,'persian'),Math.min(d,monthLength(y,m,'persian'))-1))
+      .filter(date=>date.startsWith(year+'-')&&date>=event.date);
+  }
+  const lastDay=new Date(Date.UTC(year,original.month,0)).getUTCDate();
+  return [isoDay(year,original.month,Math.min(original.day,lastDay))];
+}
 export function eventsInMonth({ year, month, region, events = [], holidayIds }) {
   if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
     throw new RangeError('Invalid calendar month');
   }
   const rows = [];
   for (const holiday of HOLIDAYS) {
-    if (holiday.region !== region || holiday.month !== month || (holidayIds && !holidayIds.includes(holiday.id))) continue;
-    rows.push({ id: holiday.id, holidayId: holiday.id, name: holiday.name, region, date: holidayDate(holiday.id, year), source: 'holiday' });
+    if (holiday.region!==region || (holidayIds && !holidayIds.includes(holiday.id)))continue;
+    for(const date of holidayDates(holiday.id,year)){
+      if(Number(date.slice(5,7))===month)rows.push({...holiday,holidayId:holiday.id,date,source:'holiday'});
+    }
   }
   const prefix = `${year}-${pad(month)}-`;
   for (const event of events) {
-    const date = occurrence(event, year);
-    if (date?.startsWith(prefix)) rows.push({ ...event, date, source: 'custom' });
+    for (const date of occurrences(event,year)) if (date.startsWith(prefix)) rows.push({ ...event, date, source: 'custom' });
   }
   return rows.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
 }
@@ -163,12 +185,11 @@ export function dueAlerts({ from, to, events = [], timeZone = 'Asia/Tehran', tim
       const earliest = new Date(localStart.stamp + (lead - 1) * DAY).toISOString().slice(0, 10);
       const latest = new Date(localEnd.stamp + (lead + 1) * DAY).toISOString().slice(0, 10);
       for (let year = Number(earliest.slice(0, 4)); year <= Number(latest.slice(0, 4)); year++) {
-        const date = occurrence(event, year);
-        if (!date || date < earliest || date > latest) continue;
-        const dueAt = reminderInstant(date, lead, time, timeZone);
-        const due = Date.parse(dueAt);
-        if (due >= start && due < end) {
-          rows.push({ ...event, date, source: 'custom', daysBefore: lead, dueAt, key: `${event.id}:${date}:${lead}` });
+        for(const date of occurrences(event,year)){
+          if(date<earliest || date>latest)continue;
+          const dueAt=reminderInstant(date,lead,time,timeZone);
+          const due=Date.parse(dueAt);
+          if(due>=start && due<end)rows.push({...event,date,source:'custom',daysBefore:lead,dueAt,key:`${event.id}:${date}:${lead}`});
         }
       }
     }

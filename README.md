@@ -23,7 +23,7 @@ The installed app opens on Home with the newest catalog additions first. The bot
 
 [Preview the Persian mobile home screen](docs/mobile-home.png)
 
-Open [/planner/](http://localhost:3000/planner/) for the Persian/English installable occasion calendar. Personal dates, gift notes and the reminder inbox persist on the device. Regional observances support automatic three-day and one-day flower reminders. See the [planner setup and mobile testing checklist](docs/planner.md), [regional rules](docs/occasions.md) and [background push setup](docs/planner-push.md).
+Open [/planner/](http://localhost:3000/planner/) for the Persian/English installable occasion calendar. Visitors can browse. Members save events in their account with an account-scoped offline copy. Solar Hijri is the default across the site, with an independent Gregorian toggle. Staff sign in at `/admin`. Regional observances support automatic three-day and one-day flower reminders. See the [planner setup and mobile testing checklist](docs/planner.md), [regional rules](docs/occasions.md) and [background push setup](docs/planner-push.md).
 
 ## Try the shop on Windows
 

@@ -1,3 +1,4 @@
+import {smsProvider,smsTick} from './planner.js';
 import { createServer } from 'node:http';
 import { resolve,join } from 'node:path';
 import { mkdirSync } from 'node:fs';
@@ -11,8 +12,11 @@ const dir=resolve(process.env.DATA_DIR||'data');
 mkdirSync(dir,{recursive:true});
 const db=openDb(join(dir,'shop.sqlite'));
 const pushCredentials=loadPushCredentials(dir);
-const handler=createHandler({db,dir,origin,production,pushCredentials,trustedProxy:process.env.TRUST_PROXY_ADDRESS,ordersEnabled:process.env.ORDERS_ENABLED==='true'});
+const sms=smsProvider();
+const handler=createHandler({sms,db,dir,origin,production,pushCredentials,trustedProxy:process.env.TRUST_PROXY_ADDRESS,ordersEnabled:process.env.ORDERS_ENABLED==='true'});
 const stopScheduler=startPushScheduler(db,pushCredentials);
+let sending=null;
+const smsTimer=sms&&setInterval(()=>{if(!sending)sending=smsTick(db,sms).catch(()=>console.error("SMS scheduler failed")).finally(()=>sending=null);},30000);
 const server=createServer({requestTimeout:30000,headersTimeout:15000},handler);
 server.listen(Number(process.env.PORT||3000),process.env.HOST||'127.0.0.1',()=>console.log('SimaGol is listening for '+origin));
-for(const signal of ['SIGINT','SIGTERM']) process.once(signal,()=>server.close(async()=>{await stopScheduler();db.close();process.exit(0)}));
+for(const signal of ['SIGINT','SIGTERM']) process.once(signal,()=>server.close(async()=>{clearInterval(smsTimer);await sending;await stopScheduler();db.close();process.exit(0)}));

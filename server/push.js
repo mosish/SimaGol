@@ -50,8 +50,9 @@ function schedule(body) {
         event.date<'1900-01-01' || event.date>'2100-12-31' ||
         (event.holidayId && !holidayIds.has(event.holidayId))) fail();
     seen.add(event.id);
+    if(event.calendar && !['gregory','persian'].includes(event.calendar))fail();
     const {id,kind,date,annual,daysBefore,holidayId}=event;
-    return {id,kind,date,annual,daysBefore,...(holidayId?{holidayId}:{})};
+    return {id,kind,date,annual,daysBefore,...(event.calendar?{calendar:event.calendar}:{}),...(holidayId?{holidayId}:{})};
   });
   return JSON.stringify({time:body.time,timeZone:body.timeZone,events});
 }
