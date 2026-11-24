@@ -1,0 +1,68 @@
+SimaGol/
+├── .dockerignore
+├── .editorconfig
+├── .env
+├── .env.example
+├── .git/
+├── .gitattributes
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── .gitignore
+├── .prettierrc.json
+├── CREDITS.md
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── compose.yaml
+├── data/
+│   └── shop.sqlite
+├── docs/
+│   ├── api.md
+│   ├── deployment.md
+│   ├── design.md
+│   ├── github.md
+│   ├── tree.txt
+│   └── verification.md
+├── eslint.config.mjs
+├── package-lock.json
+├── package.json
+├── public/
+│   ├── app.js
+│   ├── components/
+│   │   ├── account.js
+│   │   ├── admin.js
+│   │   ├── home.js
+│   │   ├── icons.js
+│   │   ├── store.js
+│   │   └── ui.js
+│   ├── images/
+│   │   ├── hero.jpg
+│   │   ├── lilies.jpg
+│   │   ├── meadow.jpg
+│   │   ├── roses.jpg
+│   │   └── tulips.jpg
+│   ├── index.html
+│   ├── labels.json
+│   └── shop.css
+├── scripts/
+│   ├── admin.js
+│   ├── lint.js
+│   └── setup.js
+├── server/
+│   ├── auth.js
+│   ├── catalog.json
+│   ├── commerce.js
+│   ├── db.js
+│   ├── http.js
+│   ├── notifications.js
+│   ├── schema.sql
+│   └── start.js
+└── tests/
+    ├── auth.test.js
+    ├── browser.smoke.mjs
+    ├── commerce.test.js
+    ├── http.test.js
+    ├── notifications.test.js
+    ├── release.test.js
+    └── storefront.test.js
