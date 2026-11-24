@@ -1,0 +1,15 @@
+import { createServer } from 'node:http';
+import { resolve,join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { openDb } from './db.js';
+import { createHandler } from './http.js';
+const production=process.env.NODE_ENV==='production';
+const origin=new URL(process.env.APP_ORIGIN||'http://localhost:3000').origin;
+if(production && !origin.startsWith('https://')) throw new Error('Configure APP_ORIGIN with HTTPS');
+const dir=resolve(process.env.DATA_DIR||'data');
+mkdirSync(dir,{recursive:true});
+const db=openDb(join(dir,'shop.sqlite'));
+const handler=createHandler({db,dir,origin,production,ordersEnabled:process.env.ORDERS_ENABLED==='true'});
+const server=createServer({requestTimeout:30000,headersTimeout:15000},handler);
+server.listen(Number(process.env.PORT||3000),process.env.HOST||'127.0.0.1',()=>console.log('SimaGol is listening for '+origin));
+for(const signal of ['SIGINT','SIGTERM']) process.on(signal,()=>server.close(()=>{db.close();process.exit(0)}));

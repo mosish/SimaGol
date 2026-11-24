@@ -1,6 +1,6 @@
 # Storefront imagery
 
-The five JPEG assets in `dist/images/` were generated for this prototype using OpenAI image generation. They depict illustrative arrangements. Replace them with photographs of the shop’s own arrangements when preparing the production catalog.
+The five JPEG assets in `public/images/` were generated for this prototype using OpenAI image generation. They depict illustrative arrangements. Replace them with photographs of the shop’s own arrangements when preparing the production catalog.
 
 | File | Arrangement |
 | --- | --- |

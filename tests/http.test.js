@@ -36,9 +36,15 @@ test('store API and authenticated customer journey', async () => {
     assert.equal(status,201);
     assert.equal((await call('POST','/api/orders',body))[1].id,created.id);
     assert.equal((await call('GET','/api/orders'))[1].length,1);
+    const [,notices]=await call('GET','/api/notifications');
+    assert.equal(notices[0].orderId,created.id);
+    assert.equal((await call('POST','/api/notifications/read',{through:notices[0].id}))[0],200);
+    assert.equal((await call('GET','/api/notifications'))[1][0].seen,true);
     await call('POST','/api/logout',{});
+    assert.equal((await call('GET','/api/notifications'))[0],401);
     assert.equal((await call('GET','/api/orders'))[0],401);
     await call('POST','/api/register',{name:'Another Buyer',email:'other@example.test',password:'only-for-this-test-789'});
     assert.equal((await call('GET','/api/orders/'+created.id))[0],404);
+    assert.deepEqual((await call('GET','/api/notifications'))[1],[]);
   } finally { db.close();rmSync(dir,{recursive:true,force:true}); }
 });

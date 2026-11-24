@@ -1,0 +1,658 @@
+{
+  "Invalid email": {
+    "fa": "نشانی ایمیل معتبر وارد کنید.",
+    "en": "Invalid email"
+  },
+  "Please try again shortly": {
+    "fa": "لطفاً کمی بعد دوباره تلاش کنید.",
+    "en": "Please try again shortly"
+  },
+  "Account not found": {
+    "fa": "حساب کاربری پیدا نشد.",
+    "en": "Account not found"
+  },
+  "Invalid name": {
+    "fa": "نام معتبر وارد کنید.",
+    "en": "Invalid name"
+  },
+  "Invalid password": {
+    "fa": "رمز عبور باید دست‌کم ۱۲ کاراکتر داشته باشد.",
+    "en": "Invalid password"
+  },
+  "Email already registered": {
+    "fa": "این ایمیل قبلاً ثبت شده است.",
+    "en": "Email already registered"
+  },
+  "Invalid email or password": {
+    "fa": "ایمیل یا رمز عبور درست نیست.",
+    "en": "Invalid email or password"
+  },
+  "Invalid profile": {
+    "fa": "اطلاعات حساب را بررسی کنید.",
+    "en": "Invalid profile"
+  },
+  "Invalid addresses": {
+    "fa": "حداکثر ۲۰ نشانی وارد کنید. هر نشانی باید بین ۱ تا ۵۰۰ کاراکتر باشد.",
+    "en": "Invalid addresses"
+  },
+  "Invalid preferences": {
+    "fa": "تنظیمات حساب معتبر نیست.",
+    "en": "Invalid preferences"
+  },
+  "Invalid role": {
+    "fa": "نقش انتخاب‌شده معتبر نیست.",
+    "en": "Invalid role"
+  },
+  "Keep at least one owner": {
+    "fa": "فروشگاه باید حداقل یک مالک داشته باشد.",
+    "en": "Keep at least one owner"
+  },
+  "File too large": {
+    "fa": "حجم فایل بیش از حد مجاز است.",
+    "en": "File too large"
+  },
+  "Invalid input": {
+    "fa": "اطلاعات واردشده را بررسی کنید.",
+    "en": "Invalid input"
+  },
+  "Invalid image": {
+    "fa": "یک تصویر JPEG، PNG یا WebP با حجم حداکثر ۲ مگابایت انتخاب کنید.",
+    "en": "Invalid image"
+  },
+  "Try again later": {
+    "fa": "لطفاً بعداً دوباره تلاش کنید.",
+    "en": "Try again later"
+  },
+  "Method unavailable": {
+    "fa": "این روش درخواست پشتیبانی نمی‌شود.",
+    "en": "Method unavailable"
+  },
+  "Please sign in": {
+    "fa": "لطفاً وارد حساب خود شوید.",
+    "en": "Please sign in"
+  },
+  "Order not found": {
+    "fa": "سفارش پیدا نشد.",
+    "en": "Order not found"
+  },
+  "Order key already used": {
+    "fa": "این سفارش قبلاً پردازش شده است. تاریخچه سفارش‌ها را بررسی کنید.",
+    "en": "Order key already used"
+  },
+  "Time slot unavailable": {
+    "fa": "این بازه تحویل دیگر در دسترس نیست.",
+    "en": "Time slot unavailable"
+  },
+  "Stock unavailable": {
+    "fa": "موجودی برای تعداد انتخاب‌شده کافی نیست.",
+    "en": "Stock unavailable"
+  },
+  "Price changed": {
+    "fa": "قیمت تغییر کرده است. مبلغ جدید را بررسی کنید.",
+    "en": "Price changed"
+  },
+  "Invalid status transition": {
+    "fa": "این تغییر وضعیت برای سفارش مجاز نیست.",
+    "en": "Invalid status transition"
+  },
+  "Record not found": {
+    "fa": "مورد درخواستی پیدا نشد.",
+    "en": "Record not found"
+  },
+  "Slot capacity below bookings": {
+    "fa": "ظرفیت نمی‌تواند کمتر از تعداد سفارش‌های رزروشده باشد.",
+    "en": "Slot capacity below bookings"
+  },
+  "Unknown action": {
+    "fa": "این عملیات پشتیبانی نمی‌شود.",
+    "en": "Unknown action"
+  },
+  "Switch theme": {
+    "fa": "تغییر حالت روشن و تاریک",
+    "en": "Switch theme"
+  },
+  "Search": {
+    "fa": "جست‌وجوی گل‌ها",
+    "en": "Search flowers"
+  },
+  "SimaGol": {
+    "fa": "سیماگل",
+    "en": "SimaGol"
+  },
+  "Loading flowers": {
+    "fa": "در حال بارگذاری گل‌ها…",
+    "en": "Loading flowers…"
+  },
+  "Notifications": {
+    "fa": "اعلان‌ها",
+    "en": "Notifications"
+  },
+  "Unread": {
+    "fa": "خوانده‌نشده",
+    "en": "Unread"
+  },
+  "Mark all as read": {
+    "fa": "علامت‌گذاری همه به‌عنوان خوانده‌شده",
+    "en": "Mark all as read"
+  },
+  "No notifications yet": {
+    "fa": "هنوز اعلانی ندارید.",
+    "en": "No notifications yet"
+  },
+  "brand": {
+    "fa": "سیماگل",
+    "en": "SimaGol"
+  },
+  "eyebrow": {
+    "fa": "گل‌فروشی سیماگل",
+    "en": "SimaGol Floral Studio"
+  },
+  "hero1": {
+    "fa": "برای لحظه‌های",
+    "en": "For moments"
+  },
+  "hero2": {
+    "fa": "دوست‌داشتنی",
+    "en": "worth keeping"
+  },
+  "intro": {
+    "fa": "یک دسته‌گل برای میز صبحانه، یک شاخه برای کسی که دلت برایش تنگ شده.",
+    "en": "A bouquet for the breakfast table. A few stems for someone you miss."
+  },
+  "explore": {
+    "fa": "انتخاب دسته‌گل",
+    "en": "Explore the flowers"
+  },
+  "collection": {
+    "fa": "گل‌های این فصل",
+    "en": "Seasonal flowers"
+  },
+  "shop": {
+    "fa": "فروشگاه",
+    "en": "Shop"
+  },
+  "favorites": {
+    "fa": "علاقه‌مندی‌ها",
+    "en": "Favorites"
+  },
+  "products": {
+    "fa": "محصول",
+    "en": "items"
+  },
+  "toman": {
+    "fa": "تومان",
+    "en": "toman"
+  },
+  "Skip to flowers": {
+    "fa": "رفتن به فهرست گل‌ها",
+    "en": "Skip to flowers"
+  },
+  "Account": {
+    "fa": "حساب من",
+    "en": "Account"
+  },
+  "Staff": {
+    "fa": "مدیریت فروشگاه",
+    "en": "Staff"
+  },
+  "Login": {
+    "fa": "ورود",
+    "en": "Login"
+  },
+  "Register": {
+    "fa": "ثبت‌نام",
+    "en": "Register"
+  },
+  "Name": {
+    "fa": "نام",
+    "en": "Name"
+  },
+  "Email": {
+    "fa": "ایمیل",
+    "en": "Email"
+  },
+  "Password": {
+    "fa": "رمز عبور",
+    "en": "Password"
+  },
+  "Use at least 12 characters": {
+    "fa": "حداقل ۱۲ کاراکتر وارد کنید.",
+    "en": "Use at least 12 characters"
+  },
+  "Ordering is closed": {
+    "fa": "ثبت سفارش در حال حاضر بسته است",
+    "en": "Ordering is closed"
+  },
+  "Your bag is empty": {
+    "fa": "سبد خرید شما خالی است",
+    "en": "Your bag is empty"
+  },
+  "Delivery unavailable": {
+    "fa": "در حال حاضر امکان ارسال وجود ندارد.",
+    "en": "Delivery unavailable"
+  },
+  "Checkout": {
+    "fa": "تکمیل سفارش",
+    "en": "Checkout"
+  },
+  "Recipient": {
+    "fa": "نام گیرنده",
+    "en": "Recipient"
+  },
+  "Phone": {
+    "fa": "شماره تماس",
+    "en": "Phone"
+  },
+  "Address book": {
+    "fa": "نشانی‌های ذخیره‌شده",
+    "en": "Address book"
+  },
+  "Enter an address": {
+    "fa": "وارد کردن نشانی جدید",
+    "en": "Enter an address"
+  },
+  "Delivery address": {
+    "fa": "نشانی تحویل",
+    "en": "Delivery address"
+  },
+  "Delivery": {
+    "fa": "روش ارسال",
+    "en": "Delivery"
+  },
+  "Gift wrap": {
+    "fa": "بسته‌بندی هدیه",
+    "en": "Gift wrap"
+  },
+  "Card message": {
+    "fa": "متن کارت هدیه",
+    "en": "Card message"
+  },
+  "Payment on delivery": {
+    "fa": "پرداخت هنگام تحویل",
+    "en": "Payment on delivery"
+  },
+  "Place order": {
+    "fa": "ثبت سفارش",
+    "en": "Place order"
+  },
+  "Time slot": {
+    "fa": "بازه تحویل",
+    "en": "Time slot"
+  },
+  "Total": {
+    "fa": "مبلغ نهایی",
+    "en": "Total"
+  },
+  "Invoice": {
+    "fa": "فاکتور",
+    "en": "Invoice"
+  },
+  "Reorder": {
+    "fa": "سفارش دوباره",
+    "en": "Reorder"
+  },
+  "Saved addresses, one per line": {
+    "fa": "نشانی‌های ذخیره‌شده‌ (هر نشانی در یک خط)",
+    "en": "Saved addresses, one per line"
+  },
+  "Save": {
+    "fa": "ذخیره",
+    "en": "Save"
+  },
+  "Order updates": {
+    "fa": "پیگیری سفارش‌ها",
+    "en": "Order updates"
+  },
+  "No orders yet": {
+    "fa": "هنوز سفارشی ثبت نکرده‌اید.",
+    "en": "No orders yet"
+  },
+  "Log out": {
+    "fa": "خروج از حساب",
+    "en": "Log out"
+  },
+  "Print": {
+    "fa": "چاپ",
+    "en": "Print"
+  },
+  "New product": {
+    "fa": "محصول جدید",
+    "en": "New product"
+  },
+  "Description": {
+    "fa": "توضیحات",
+    "en": "Description"
+  },
+  "Category": {
+    "fa": "دسته‌بندی",
+    "en": "Category"
+  },
+  "Image path": {
+    "fa": "مسیر تصویر",
+    "en": "Image path"
+  },
+  "Price in rial": {
+    "fa": "قیمت به ریال",
+    "en": "Price in rial"
+  },
+  "Stock": {
+    "fa": "موجودی",
+    "en": "Stock"
+  },
+  "Hide product": {
+    "fa": "پنهان کردن محصول",
+    "en": "Hide product"
+  },
+  "Access denied": {
+    "fa": "شما به این بخش دسترسی ندارید.",
+    "en": "Access denied"
+  },
+  "Orders": {
+    "fa": "سفارش‌ها",
+    "en": "Orders"
+  },
+  "Status": {
+    "fa": "وضعیت",
+    "en": "Status"
+  },
+  "Update": {
+    "fa": "به‌روزرسانی",
+    "en": "Update"
+  },
+  "Catalog": {
+    "fa": "فهرست محصولات",
+    "en": "Catalog"
+  },
+  "Homepage and media": {
+    "fa": "صفحه اصلی و تصاویر",
+    "en": "Homepage and media"
+  },
+  "Upload image": {
+    "fa": "بارگذاری تصویر",
+    "en": "Upload image"
+  },
+  "Upload": {
+    "fa": "بارگذاری",
+    "en": "Upload"
+  },
+  "Hero image": {
+    "fa": "تصویر اصلی",
+    "en": "Hero image"
+  },
+  "Logo": {
+    "fa": "نشان فروشگاه",
+    "en": "Logo"
+  },
+  "Sima · hero": {
+    "fa": "تصویر سیما در صفحه اصلی",
+    "en": "Sima · hero"
+  },
+  "Sima · empty": {
+    "fa": "تصویر سیما در حالت خالی",
+    "en": "Sima · empty"
+  },
+  "Sima · loading": {
+    "fa": "تصویر سیما هنگام بارگذاری",
+    "en": "Sima · loading"
+  },
+  "Sima · 404": {
+    "fa": "تصویر سیما در صفحه پیدا نشد",
+    "en": "Sima · 404"
+  },
+  "Show hero": {
+    "fa": "نمایش بخش اصلی",
+    "en": "Show hero"
+  },
+  "Translations": {
+    "fa": "ترجمه‌ها",
+    "en": "Translations"
+  },
+  "Label": {
+    "fa": "عبارت",
+    "en": "Label"
+  },
+  "Translation": {
+    "fa": "ترجمه",
+    "en": "Translation"
+  },
+  "Delivery settings": {
+    "fa": "تنظیمات ارسال",
+    "en": "Delivery settings"
+  },
+  "Fee in rial": {
+    "fa": "هزینه به ریال",
+    "en": "Fee in rial"
+  },
+  "Gift wrap fee in rial": {
+    "fa": "هزینه بسته‌بندی هدیه به ریال",
+    "en": "Gift wrap fee in rial"
+  },
+  "Time slots": {
+    "fa": "بازه‌های تحویل",
+    "en": "Time slots"
+  },
+  "End time (UTC ISO)": {
+    "fa": "پایان بازه (به وقت UTC، قالب ISO)",
+    "en": "End time (UTC ISO)"
+  },
+  "Capacity": {
+    "fa": "ظرفیت",
+    "en": "Capacity"
+  },
+  "Customers and roles": {
+    "fa": "مشتریان و نقش‌ها",
+    "en": "Customers and roles"
+  },
+  "Role": {
+    "fa": "نقش",
+    "en": "Role"
+  },
+  "owner": {
+    "fa": "مالک فروشگاه",
+    "en": "Owner"
+  },
+  "editor": {
+    "fa": "ویرایشگر",
+    "en": "Editor"
+  },
+  "florist": {
+    "fa": "گل‌فروش",
+    "en": "Florist"
+  },
+  "customer": {
+    "fa": "مشتری",
+    "en": "Customer"
+  },
+  "placed": {
+    "fa": "ثبت شده",
+    "en": "Placed"
+  },
+  "preparing": {
+    "fa": "در حال آماده‌سازی",
+    "en": "Preparing"
+  },
+  "shipped": {
+    "fa": "ارسال شده",
+    "en": "Shipped"
+  },
+  "delivered": {
+    "fa": "تحویل داده شده",
+    "en": "Delivered"
+  },
+  "cancelled": {
+    "fa": "لغو شده",
+    "en": "Cancelled"
+  },
+  "standard": {
+    "fa": "ارسال عادی",
+    "en": "Standard delivery"
+  },
+  "express": {
+    "fa": "ارسال سریع",
+    "en": "Express delivery"
+  },
+  "scheduled": {
+    "fa": "ارسال زمان‌بندی‌شده",
+    "en": "Scheduled delivery"
+  },
+  "All flowers": {
+    "fa": "همه گل‌ها",
+    "en": "All flowers"
+  },
+  "Favorites": {
+    "fa": "علاقه‌مندی‌ها",
+    "en": "Favorites"
+  },
+  "Add to bag": {
+    "fa": "افزودن به سبد",
+    "en": "Add to bag"
+  },
+  "No flowers found": {
+    "fa": "گلی با این مشخصات پیدا نشد.",
+    "en": "No flowers found"
+  },
+  "Sold out": {
+    "fa": "ناموجود",
+    "en": "Sold out"
+  },
+  "Shopping bag": {
+    "fa": "سبد خرید",
+    "en": "Shopping bag"
+  },
+  "Remove": {
+    "fa": "کم کردن تعداد",
+    "en": "Remove"
+  },
+  "Subtotal": {
+    "fa": "جمع محصولات",
+    "en": "Subtotal"
+  },
+  "Sima image placeholder": {
+    "fa": "جای تصویر سیما",
+    "en": "Sima image placeholder"
+  },
+  "Service unavailable": {
+    "fa": "ارتباط با فروشگاه برقرار نشد. دوباره تلاش کنید.",
+    "en": "Service unavailable"
+  },
+  "Close": {
+    "fa": "بستن",
+    "en": "Close"
+  },
+  "Search flowers": {
+    "fa": "جست‌وجوی گل‌ها",
+    "en": "Search flowers"
+  },
+  "Dark mode": {
+    "fa": "حالت تاریک",
+    "en": "Dark mode"
+  },
+  "Light mode": {
+    "fa": "حالت روشن",
+    "en": "Light mode"
+  },
+  "Loading": {
+    "fa": "در حال بارگذاری",
+    "en": "Loading"
+  },
+  "Page not found": {
+    "fa": "صفحه پیدا نشد",
+    "en": "Page not found"
+  },
+  "Back to shop": {
+    "fa": "بازگشت به فروشگاه",
+    "en": "Back to shop"
+  },
+  "Added to bag": {
+    "fa": "به سبد خرید اضافه شد.",
+    "en": "Added to bag"
+  },
+  "Saved": {
+    "fa": "ذخیره شد.",
+    "en": "Saved"
+  },
+  "Order placed": {
+    "fa": "سفارش شما ثبت شد.",
+    "en": "Order placed"
+  },
+  "Language": {
+    "fa": "زبان",
+    "en": "Language"
+  },
+  "Sign in": {
+    "fa": "ورود",
+    "en": "Sign in"
+  },
+  "Retry": {
+    "fa": "تلاش دوباره",
+    "en": "Retry"
+  },
+  "Name · FA": {
+    "fa": "نام (فارسی)",
+    "en": "Name (Persian)"
+  },
+  "Name · EN": {
+    "fa": "نام (انگلیسی)",
+    "en": "Name (English)"
+  },
+  "Description · FA": {
+    "fa": "توضیحات (فارسی)",
+    "en": "Description (Persian)"
+  },
+  "Description · EN": {
+    "fa": "توضیحات (انگلیسی)",
+    "en": "Description (English)"
+  },
+  "Category · FA": {
+    "fa": "دسته‌بندی (فارسی)",
+    "en": "Category (Persian)"
+  },
+  "Category · EN": {
+    "fa": "دسته‌بندی (انگلیسی)",
+    "en": "Category (English)"
+  },
+  "Translation · FA": {
+    "fa": "ترجمه (فارسی)",
+    "en": "Translation (Persian)"
+  },
+  "Translation · EN": {
+    "fa": "ترجمه (انگلیسی)",
+    "en": "Translation (English)"
+  },
+  "Time slot · FA": {
+    "fa": "بازه تحویل (فارسی)",
+    "en": "Time slot (Persian)"
+  },
+  "Time slot · EN": {
+    "fa": "بازه تحویل (انگلیسی)",
+    "en": "Time slot (English)"
+  },
+  "Homepage sections": {
+    "fa": "بخش‌های صفحه نخست",
+    "en": "Homepage sections"
+  },
+  "First section": {
+    "fa": "اولین بخش",
+    "en": "First section"
+  },
+  "Hero": {
+    "fa": "معرفی فروشگاه",
+    "en": "Hero"
+  },
+  "Show banner": {
+    "fa": "نمایش بنر",
+    "en": "Show banner"
+  },
+  "Banner image": {
+    "fa": "تصویر بنر",
+    "en": "Banner image"
+  },
+  "Banner · FA": {
+    "fa": "متن فارسی بنر",
+    "en": "Banner · FA"
+  },
+  "Banner · EN": {
+    "fa": "متن انگلیسی بنر",
+    "en": "Banner · EN"
+  }
+}
