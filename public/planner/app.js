@@ -1,6 +1,7 @@
 import { HOLIDAYS, holidayDate, eventsInMonth, dueAlerts, localDate } from './dates.js';
 import { initDevice } from './device.js';
 import { renderGreeting } from '../components/greeting.js';
+import { renderNavigation } from '../components/navigation.js';
 import { newPlanner, loadPlanner, savePlanner, collectAlerts, removeEntry, upsert, validLink, validZone } from './store.js';
 
 const copy = {
@@ -148,6 +149,7 @@ function displayDate(date) {
   [year,month]=date.split('-').map(Number);
 }
 function appearance() {
+  renderNavigation('bell', lang);
   renderGreeting($('.brand small'), customerName, lang);
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';

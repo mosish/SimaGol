@@ -73,6 +73,7 @@ export function createHandler({db,dir,origin,production,ordersEnabled,trustedPro
       if(!path.startsWith('/api/')) {
         if(!['GET','HEAD'].includes(method)) fail(405,'Method unavailable');
         if(path==='/planner'){res.statusCode=308;res.setHeader('Location','/planner/');res.end();return;}
+        if(path==='/planner/sw.js') res.setHeader('Service-Worker-Allowed','/');
         const plannerFile=/^\/planner\/(?:|index\.html|manifest\.json|(?:app|dates|store|device|sw)\.js|planner\.css|images\/(?:icon-(?:192|512)|apple-touch|launch-[0-9]+x[0-9]+)\.png)$/.test(path);
         const unknownPage=!plannerFile && path!=='/' && path!=='/index.html' && req.headers.accept?.includes('text/html') &&
           !/^\/(?:images|uploads|components)\//.test(path);

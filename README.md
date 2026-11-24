@@ -17,7 +17,11 @@ The working domain is `simagol.com`. Develop against `localhost` and select the 
 5. **Hosting purchase and deployment**
    - [ ] Select a compatible HostIran plan and the final domain, configure DNS and HTTPS, and set `APP_ORIGIN` on the host. Verify the release, backup restoration and mobile installation/push on that origin before opening checkout. Follow the [deployment runbook](docs/deployment.md).
 
-## Occasion planner PWA
+## SimaGol PWA
+
+The installed app opens on Home with the newest catalog additions first. The bottom tabs open Home, the shopping list (cart), occasion reminders, and the customer profile. After an online visit the offline shell can display the last viewed public catalog and locally saved dates. Checkout and account data require a connection. [Mobile installation and verification](docs/planner.md)
+
+[Preview the Persian mobile home screen](docs/mobile-home.png)
 
 Open [/planner/](http://localhost:3000/planner/) for the Persian/English installable occasion calendar. Personal dates, gift notes and the reminder inbox persist on the device. Regional observances support automatic three-day and one-day flower reminders. See the [planner setup and mobile testing checklist](docs/planner.md), [regional rules](docs/occasions.md) and [background push setup](docs/planner-push.md).
 

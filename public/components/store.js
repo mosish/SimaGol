@@ -7,9 +7,11 @@ export function collection() {
   const cats = state.catalog.categories;
   $('#filters').innerHTML = [['all',t('All flowers')], ...cats.map(c => [c.id,c.name[state.lang]])]
     .map(([id,name]) => '<button class="chip '+(state.category===id?'active':'')+'" data-filter="'+esc(id)+'" aria-pressed="'+(id===state.category)+'">'+esc(name)+'</button>').join('');
-  $('.section-title h2').textContent = t(fav?'Favorites':'collection');
+  $('.section-title h2').textContent = t(fav?'Favorites':'New arrivals');
   const rows = state.catalog.products.filter(p => (!fav || state.favorites.includes(p.id)) &&
     (state.category==='all' || state.category===p.category) && normalize(p.name[state.lang]+' '+p.description[state.lang]).includes(q));
+  // The catalog API returns products in insertion order.
+  if (!fav) rows.reverse();
   $('#results').textContent = num(rows.length)+' '+t('products');
   $('#products').innerHTML = rows.map(p => {
     const id=esc(p.id), name=esc(p.name[state.lang]), saved=state.favorites.includes(p.id);

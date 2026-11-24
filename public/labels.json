@@ -1,4 +1,9 @@
 {
+  "Install app": {"fa":"نصب برنامه","en":"Install app"},
+  "New arrivals": {"fa":"تازه‌های سیماگل","en":"New arrivals"},
+  "Shopping list": {"fa":"لیست خرید","en":"Shopping list"},
+  "Browse flowers": {"fa":"دیدن گل‌ها","en":"Browse flowers"},
+  "Connect to shop": {"fa":"برای دیدن اطلاعات به‌روز و ثبت سفارش به اینترنت وصل شوید.","en":"Connect to see current shop information and place orders."},
   "Customer greeting": {
     "fa": "سلام {name} جان",
     "en": "Hello, {name}"

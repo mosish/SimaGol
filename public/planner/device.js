@@ -1,3 +1,4 @@
+import {setupInstall} from '../components/install.js';
 function applicationKey(value) {
   const raw=atob(value.replace(/-/g,'+').replace(/_/g,'/'));
   return Uint8Array.from(raw,c=>c.charCodeAt(0));
@@ -21,28 +22,13 @@ async function request(action,body) {
 }
 
 export async function initDevice({getSnapshot,onMessage}) {
-  let installEvent=null;
   let registration,config,subscription;
   let queue=Promise.resolve();
   const install=document.querySelector('#install-app');
   const enable=document.querySelector('#enable-push');
   const disable=document.querySelector('#disable-push');
   const say=(fa,en)=>onMessage(getSnapshot().lang==='fa'?fa:en);
-  const standalone=()=>matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
-  install.hidden=standalone();
-  window.addEventListener('beforeinstallprompt',event=>{
-    event.preventDefault();installEvent=event;install.hidden=false;
-  });
-  window.addEventListener('appinstalled',()=>{installEvent=null;install.hidden=true;});
-  install.onclick=async()=>{
-    if(installEvent){
-      const prompt=installEvent;installEvent=null;
-      await prompt.prompt();await prompt.userChoice;
-    } else {
-      say('در آیفون، در Safari گزینهٔ اشتراک‌گذاری و سپس افزودن به صفحهٔ اصلی را بزن. در اندروید از منوی مرورگر، نصب برنامه را انتخاب کن.',
-        'On iPhone, use Safari → Share → Add to Home Screen → Open as Web App. On Android, choose Install app or Add to Home screen in the browser menu.');
-    }
-  };
+  setupInstall(install,say);
   function controls(){
     disable.hidden=!subscription;
     enable.hidden=!!subscription;
@@ -106,7 +92,7 @@ export async function initDevice({getSnapshot,onMessage}) {
   };
   if('serviceWorker' in navigator){
     try{
-      await navigator.serviceWorker.register('/planner/sw.js',{scope:'/planner/'});
+      await navigator.serviceWorker.register('/planner/sw.js',{scope:'/'});
       registration=await navigator.serviceWorker.ready;
       subscription=await registration.pushManager?.getSubscription();
       controls();

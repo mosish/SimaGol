@@ -1,6 +1,6 @@
 # SimaGol occasion planner
 
-Open **/planner/** from the shop navigation. The calendar, editor and in-app reminder inbox run locally in the browser. Installation is optional. On the first online visit, allow the service worker to finish downloading the planner shell before disconnecting.
+Open **/planner/** from the shop navigation. The calendar, editor and in-app reminder inbox run locally in the browser. Installation is optional. On the first online visit, allow the service worker to finish downloading the app shell before disconnecting.
 
 ## Run and build
 
@@ -35,8 +35,8 @@ Use **http://localhost:3000/planner/** on the development computer. For testing 
 
 | Check | Procedure | Expected result |
 | --- | --- | --- |
-| Android installation | Visit the HTTPS planner in Chrome. Use Install when offered or the browser menu. Launch the new icon. | Standalone calendar, home-screen icon and operating-system launch screen. |
-| iOS installation | In Safari open Share → Add to Home Screen. Enable Open as Web App where offered. Launch from the new icon. | Standalone calendar. Matching iPhone and iPad sizes have portrait and landscape startup images. |
+| Android installation | Visit the HTTPS shop in Chrome. Use Install when offered or the browser menu. Launch the new icon. | Standalone storefront with four bottom tabs, home-screen icon and operating-system launch screen. |
+| iOS installation | In Safari open Share → Add to Home Screen. Enable Open as Web App where offered. Launch from the new icon. | Standalone storefront with four bottom tabs. Matching iPhone and iPad sizes have portrait and landscape startup images. |
 | Offline persistence | First open online. Save a birthday, close the app, enable airplane mode and reopen from its icon. Edit, reload, delete, reload. | The shell loads and both edits and deletion persist. Shopping and push sync require connectivity. |
 | Regional recurrence | Save US Mother's Day, then view May 2027 and May 2028. | May 9 and May 14. The matching flower reminders fall on May 6/8 and May 11/13 respectively. |
 | In-app fallback | Deny notification permission. Set a personal entry due today with a zero-day lead and a reminder time a few minutes ahead. | An unread reminder appears after that local time, including on the next opening. |

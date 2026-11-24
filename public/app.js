@@ -1,6 +1,8 @@
-import { $, state, t, label, esc, num, persist, api, mascot, changeBag, selectedItems, stored } from './components/ui.js';
+import { $, state, t, label, persist, api, mascot, changeBag, selectedItems, stored } from './components/ui.js';
 import { icon } from './components/icons.js';
+import { setupInstall } from './components/install.js';
 import { renderGreeting } from './components/greeting.js';
+import { renderNavigation } from './components/navigation.js';
 import { collection, product, bagView } from './components/store.js';
 import { account, checkout, checkoutFields, invoice, orderCard, notificationList } from './components/account.js';
 import { showHomepage } from './components/home.js';
@@ -10,6 +12,7 @@ const modal=$('#panel');
 const content=$('#panel-body');
 let viewVersion=0;
 let ready=false;
+let offline=false;
 let returnTo='#account';
 let idempotency=stored('lastCheckout',{});
 let toastTimer;
@@ -20,6 +23,7 @@ function notify(message) {
   toastTimer=setTimeout(()=>{out.textContent='';},6500);
 }
 function appearance() {
+  updateTabs();
   document.documentElement.lang=state.lang;
   document.documentElement.dir=state.lang==='fa'?'rtl':'ltr';
   renderGreeting($('.brand small'), state.me?.name, state.lang, t('Customer greeting'));
@@ -33,8 +37,6 @@ function appearance() {
   $('#theme').innerHTML=icon(state.dark?'sun':'moon');
   $('.close').ariaLabel=t('Close');
   $('#search').ariaLabel=t('Search');$('#search').placeholder=t('Search');
-  $('#bag').ariaLabel=t('Shopping bag');
-  $('#count').textContent=num(Object.values(state.bag).filter(Number.isInteger).reduce((a,b)=>a+b,0));
   $('#hero-mascot').innerHTML=mascot('hero');
   $('.hero').hidden=state.settings.showHero===false;
   $('.hero-photo img').src='/'+(state.settings.hero||'images/hero.jpg');
@@ -47,13 +49,33 @@ function appearance() {
   collection();
 }
 function closeView() {
-  history.replaceState(null,'','#catalog');
-  if(modal.open) modal.close();
-  collection();
+  const tab=activeTab(location.hash);
+  history.replaceState(null,'',tab==='profile'?'#account':tab==='bag'?'#bag':'#catalog');
+  route();
+}
+function activeTab(hash) {
+  if (hash==='#bag'||hash==='#checkout') return 'bag';
+  if (hash==='#account'||hash==='#admin'||hash.startsWith('#invoice/')) return 'profile';
+  return 'home';
+}
+function updateTabs() {
+  const quantity=Object.values(state.bag).filter(Number.isInteger).reduce((sum,count)=>sum+count,0);
+  renderNavigation(activeTab(location.hash),state.lang,quantity);
 }
 async function route() {
   const version=++viewVersion;
   const h=location.hash;
+  const tab=activeTab(h);
+  updateTabs();
+  const page=$('#tab-page');
+  const isPage=h==='#bag'||h==='#account';
+  const entering=isPage && page.dataset.route!==h;
+  page.dataset.route=h;
+  $('#home-view').hidden=isPage;
+  page.hidden=!isPage;
+  if (isPage && modal.open) modal.close();
+  if (entering) page.replaceChildren();
+  if (!isPage) page.replaceChildren();
   if(!ready) return;
   if(['','#','#catalog','#favorites'].includes(h)){
     if(modal.open)modal.close();
@@ -62,7 +84,8 @@ async function route() {
   }
   let html;
   try {
-    if(h==='#bag') html=bagView();
+    if(offline && (tab==='profile'||h==='#checkout')) html='<p>'+label('Connect to shop')+'</p><button class="cta" data-retry>'+label('Retry')+'</button>';
+    else if(h==='#bag') html=bagView();
     else if(h==='#checkout'){returnTo='#checkout';html=checkout();}
     else if(h==='#account'){returnTo='#account';html=await account();}
     else if(h==='#admin') html=await admin();
@@ -73,6 +96,16 @@ async function route() {
     }
   } catch(e) {html='<h2>'+label(e.message)+'</h2>';}
   if(version!==viewVersion) return;
+  if(isPage) {
+    content.replaceChildren();
+    page.innerHTML=html;
+    if (h==='#bag') {
+      page.querySelector('h2').textContent=t('Shopping list');
+      if (!selectedItems().length) page.insertAdjacentHTML('beforeend','<p><a class="cta" href="/">'+label('Browse flowers')+'</a></p>');
+    }
+    if (entering) page.focus();
+    return;
+  }
   content.innerHTML=html+'<p role="status" id="panel-status"></p>';
   modal.ariaLabel=content.querySelector('h2')?.textContent||t('SimaGol');
   if(!modal.open) modal.showModal();
@@ -81,6 +114,8 @@ async function route() {
 async function refresh() {
   const [shop,me]=await Promise.all([api('store'),api('me')]);
   state.catalog=shop.catalog;state.settings=shop.settings;state.me=me;
+  offline=false;
+  persist('publicCatalog',shop.catalog);
   persist('mascot',shop.settings.mascot);
   const bag={};
   for(const p of state.catalog.products) {
@@ -101,8 +136,8 @@ async function preference() {
 }
 $('#language').onclick=()=>{state.lang=state.lang==='fa'?'en':'fa';preference().catch(e=>notify(t(e.message)));};
 $('#theme').onclick=()=>{state.dark=!state.dark;preference().catch(e=>notify(t(e.message)));};
-$('#favorites').onclick=()=>{state.category='all';$('#search').value='';location.hash='favorites';$('#catalog').scrollIntoView();collection();};
-$('#bag').onclick=()=>location.hash='bag';
+$('#favorites').onclick=()=>{state.category='all';$('#search').value='';location.hash=location.hash==='#favorites'?'catalog':'favorites';$('#catalog').scrollIntoView();collection();};
+setupInstall($('#install-app'),(fa,en)=>notify(state.lang==='fa'?fa:en));
 $('.close').onclick=closeView;
 modal.oncancel=e=>{e.preventDefault();closeView();};
 $('#search').oninput=collection;
@@ -226,7 +261,14 @@ async function boot() {
     const r=await fetch('/labels.json');if(!r.ok)throw new Error();
     state.dict=await r.json();state.settings.mascot=stored('mascot',{});
     appearance();$('#products').innerHTML=mascot('loading')+label('Loading flowers');
-    await refresh();await route();
-  }catch{$('#products').innerHTML='<div class="empty">'+label('Service unavailable')+' <button data-retry>'+label('Retry')+'</button></div>';}
+    await refresh();$('#feedback').replaceChildren();await route();
+  }catch{
+    const cached=stored('publicCatalog',null);
+    if(cached && Array.isArray(cached.products) && Array.isArray(cached.categories)) state.catalog=cached;
+    offline=true;state.me=null;ready=true;appearance();await route();
+    $('#feedback').innerHTML=label('Connect to shop')+' <button data-retry>'+label('Retry')+'</button>';
+  }
 }
+window.addEventListener('online',boot);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/planner/sw.js',{scope:'/'}).catch(()=>{});
 boot();

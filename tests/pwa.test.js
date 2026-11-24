@@ -10,7 +10,9 @@ const prefix='public/planner/';
 const manifest=JSON.parse(readFileSync(prefix+'manifest.json'));
 test('standalone shell, PNG dimensions and iOS launch assets are consistent',()=>{
   assert.equal(manifest.display,'standalone');
-  assert.equal(manifest.start_url,'/planner/');
+  assert.equal(manifest.start_url,'/');
+  assert.equal(manifest.scope,'/');
+  assert.equal(manifest.id,'/planner/'); // Preserve the identity of existing installations.
   for(const size of [192,512]){
     const icon=manifest.icons.find(i=>i.sizes===size+'x'+size);
     const png=readFileSync(join(prefix,icon.src));
@@ -41,7 +43,7 @@ test('offline install caches the working planner without private endpoints',asyn
       assert.ok(res.bytes?.length,path);
     }
   } finally {db.close();}
-  assert.ok(paths.includes('/planner/') && paths.includes('/planner/store.js'));
+  for(const path of ['/','/app.js','/components/navigation.js','/planner/','/planner/store.js']) assert.ok(paths.includes(path));
   let intercepted=false;
   handlers.fetch({request:{url:'https://shop.example/api/me',method:'GET'},respondWith:()=>{intercepted=true}});
   assert.equal(intercepted,false);

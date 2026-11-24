@@ -23,7 +23,8 @@ try {
   const origin='http://127.0.0.1:'+server.address().port;
   server.on('request',createHandler({db,dir,origin,production:false,ordersEnabled:true}));
   browser=await chromium.launch();
-  const page=await browser.newPage({viewport:{width:1280,height:900}});
+  const context=await browser.newContext({viewport:{width:1280,height:900}});
+  const page=await context.newPage();
   const errors=[];
   page.on('pageerror',err=>errors.push(err.message));
   page.on('response',res=>{
@@ -33,6 +34,8 @@ try {
   await page.locator('.product').first().waitFor();
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   assert.equal(await page.locator('.product').count(),4);
+  assert.equal(await page.locator('.app-tabs a').count(),4);
+  assert.equal(await page.locator('.product .pic').first().getAttribute('href'),'#product/lily');
   assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
   await page.locator('#language').click();
   await page.waitForFunction(()=>document.documentElement.lang==='en' && document.documentElement.dir==='ltr');
@@ -47,7 +50,7 @@ try {
   assert.equal(await page.locator('.product').count(),1);
   await page.locator('.product h3 a').click();
   await page.locator('#panel .detail-actions [data-add]').click();
-  await page.locator('#panel a[href="#checkout"]').click();
+  await page.locator('#tab-page a[href="#checkout"]').click();
   await page.locator('summary').filter({hasText:'Register'}).click();
   const registration=page.locator('[data-form="Register"]');
   await registration.locator('[name=name]').fill('Test Buyer');
@@ -72,7 +75,7 @@ try {
   await page.locator('.invoice').waitFor();
   assert.match(await page.locator('.invoice').textContent(),/Test gift/);
   await page.locator('.close').click();
-  await page.locator('nav [href="#account"]').click();
+  await page.locator('[data-tab="profile"]').click();
   await page.locator('#history .order').waitFor();
   await page.locator('[data-logout]').click();
   const login=page.locator('[data-form="Login"]');
@@ -81,7 +84,6 @@ try {
   await login.locator('[name=password]').fill(staffPassword);
   await login.locator('[type=submit]').click();
   await page.locator('[data-logout]').waitFor();
-  await page.locator('.close').click();
   await page.locator('#staff-link').click();
   const status=page.locator('[data-form="status"]').first();
   await status.locator('[name=status]').selectOption('preparing');

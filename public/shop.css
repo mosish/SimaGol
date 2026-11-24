@@ -712,31 +712,31 @@ dialog:has([data-form="product"]) {
   width: min(48rem, 94vw);
 }
 
-dialog h2, dialog h3 {
+:is(dialog, #tab-page) h2, :is(dialog, #tab-page) h3 {
   line-height: 1.45;
   margin-block: .3rem 1rem;
 }
 
-dialog form {
+:is(dialog, #tab-page) form {
   display: grid;
   gap: .8rem;
   padding-block: .6rem 1.1rem;
 }
 
-dialog form > label {
+:is(dialog, #tab-page) form > label {
   display: grid;
   gap: .25rem;
   font-size: .95rem;
 }
 
-dialog label:has(input[type="checkbox"]) {
+:is(dialog, #tab-page) label:has(input[type="checkbox"]) {
   display: flex;
   align-items: center;
   gap: .6rem;
   min-height: 36px;
 }
 
-dialog :is(input, select, textarea):not([type="checkbox"]):not([type="hidden"]) {
+:is(dialog, #tab-page) :is(input, select, textarea):not([type="checkbox"]):not([type="hidden"]) {
   display: block;
   width: 100%;
   min-width: 0;
@@ -749,32 +749,32 @@ dialog :is(input, select, textarea):not([type="checkbox"]):not([type="hidden"]) 
   border-radius: 10px;
 }
 
-dialog input[type="checkbox"] {
+:is(dialog, #tab-page) input[type="checkbox"] {
   accent-color: var(--accent);
   width: 1.05rem;
   height: 1.05rem;
 }
 
-dialog input:is([type="email"], [type="tel"], [name="ends"]) {
+:is(dialog, #tab-page) input:is([type="email"], [type="tel"], [name="ends"]) {
   direction: ltr;
 }
 
-dialog textarea {
+:is(dialog, #tab-page) textarea {
   resize: vertical;
   min-height: 6rem;
 }
 
-dialog small {
+:is(dialog, #tab-page) small {
   color: var(--muted);
 }
 
-dialog .cta {
+:is(dialog, #tab-page) .cta {
   justify-self: start;
   justify-content: center;
   min-height: 42px;
 }
 
-dialog details {
+:is(dialog, #tab-page) details {
   padding: .6rem .8rem;
   margin-block: .5rem;
   background: var(--bg);
@@ -782,17 +782,17 @@ dialog details {
   border-radius: 12px;
 }
 
-dialog summary {
+:is(dialog, #tab-page) summary {
   cursor: pointer;
   font-weight: 600;
   padding: .25rem;
 }
 
-dialog details[open] > summary {
+:is(dialog, #tab-page) details[open] > summary {
   margin-block-end: .5rem;
 }
 
-dialog details > section + section, dialog form + form {
+:is(dialog, #tab-page) details > section + section, :is(dialog, #tab-page) form + form {
   border-top: 1px solid var(--line);
   padding-block-start: .8rem;
 }
@@ -906,3 +906,60 @@ dialog details > section + section, dialog form + form {
 #banner img { width: min(30%, 180px); max-height: 120px; object-fit: cover; border-radius: 12px; }
 #banner p { overflow-wrap: anywhere; }
 dialog:has([data-form="product"]) { width: min(680px, 95vw); }
+
+/* The four destinations share a compact bar across the shop and planner. */
+body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+.header-wrap, main { max-width: 1080px; }
+.header-wrap { height: auto; min-height: 64px; padding-block: 8px; }
+.brand strong { font-size: 1.125rem; }
+.app-tabs {
+  position: fixed; z-index: 5; inset-inline: 0; bottom: 0; margin-inline: auto;
+  display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 3px;
+  width: min(100%, 34rem); padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+  background: var(--surface); border: 1px solid var(--line); border-bottom: 0;
+  border-radius: 20px 20px 0 0; box-shadow: 0 -3px 20px #37233912;
+}
+.app-tabs a {
+  flex-direction: column; justify-content: center; gap: 3px; min-height: 48px;
+  border-radius: 14px; color: var(--muted); line-height: 1.35; font-size: .78rem;
+}
+.app-tabs svg { width: 21px; height: 21px; }
+.app-tabs a[aria-current="page"] { background: var(--hero); color: var(--text); font-weight: bold; }
+#feedback:not(:empty) { inset-block-end: calc(70px + env(safe-area-inset-bottom)); }
+#tab-page {
+  max-width: 40rem; margin: 20px auto; border: 1px solid var(--line);
+  background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: clamp(16px,3vw,28px);
+}
+#tab-page h2, .section-title h2 { font-family: inherit; line-height: 1.55; font-size: 1.25rem; }
+#tab-page h3 { font-size: 1.05rem; }
+#home-view { padding-block: 16px; }
+.hero {
+  grid-template-columns: minmax(0, 1.65fr) minmax(96px, 1fr);
+  margin: 0 0 20px; border-radius: 20px;
+}
+#catalog ~ .hero { margin-block: 20px 0; }
+.hero-copy { padding: clamp(14px, 2vw, 24px); }
+.hero h1 { font-size: clamp(1.15rem, 2.4vw, 1.75rem); line-height: 1.45; margin: .3rem 0; }
+.hero p { font-size: .88rem; margin: .3rem 0; }
+.hero-photo { min-height: 100%; grid-row: auto; }
+.photo-stamp { width: 48px; height: 48px; bottom: 10px; inset-inline-end: 10px; }
+.photo-stamp i svg { width: 15px; height: 15px; }
+.photo-stamp span { font-size: 6px; }
+.hero .mascot { max-height: 42px; }
+.hero .mascot-placeholder { font-size: .72rem; margin: .25rem 0 0; }
+.pic { aspect-ratio: 1.45; }
+.card-content h3 { font-size: 1rem; }
+.card-info .price { font-size: .88rem; }
+.filter-row { justify-content: flex-start; }
+#results { margin-inline-start: auto; }
+.detail-photo { max-height: 240px; object-fit: cover; }
+@media (max-width:620px) {
+  .header-wrap { min-height: 60px; }
+  .hero { grid-template-columns: minmax(0, 1fr) 32%; }
+  .hero-copy { padding: 12px; }
+  .section-head { gap: 8px; }
+  .card-content { padding: 7px 5px; }
+  .header-wrap nav { width: auto; order: initial; }
+  .search input, #tab-page input { font-size: 1rem; }
+}
+@media print { .app-tabs { display: none; } body { padding: 0; } }

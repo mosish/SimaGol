@@ -41,7 +41,8 @@ try {
     return (await fetch(manifestURL)).json();
   });
   assert.equal(manifest.display,'standalone');
-  assert.equal(manifest.start_url,'/planner/');
+  assert.equal(manifest.start_url,'/');
+  assert.equal(manifest.scope,'/');
   assert.ok(manifest.icons.some(i=>i.sizes==='512x512'));
 
   const editor=page.locator('#event-form');
@@ -84,6 +85,12 @@ try {
   await page.reload({waitUntil:'domcontentloaded'});
   await entries.getByRole('heading',{name:"National Doctors' Day"}).waitFor();
   assert.equal(await birthday.count(),0);
+  await page.locator('[data-tab="home"]').click();
+  await page.locator('[data-tab="home"][aria-current="page"]').waitFor();
+  await page.locator('[data-tab="bag"]').click();
+  await page.locator('#tab-page h2').waitFor();
+  await page.locator('[data-tab="bell"]').click();
+  await entries.getByRole('heading',{name:"National Doctors' Day"}).waitFor();
   assert.deepEqual(pageErrors,[]);
   console.log('Mobile Chromium verified planner CRUD, Iran/India selection, standalone manifest, offline reload and offline edits.');
 } finally {
