@@ -1,0 +1,23 @@
+services:
+  shop:
+    build: .
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATA_DIR: /app/data
+      APP_ORIGIN: ${APP_ORIGIN:?Set the public HTTPS origin in .env}
+      ORDERS_ENABLED: ${ORDERS_ENABLED:-false}
+    volumes:
+      - flower-data:/app/data
+    ports:
+      - "127.0.0.1:3000:3000"
+volumes:
+  flower-data:
