@@ -7,7 +7,7 @@ import { renderNavigation } from './components/navigation.js';
 import { collection, product, bagView } from './components/store.js';
 import { account, checkout, checkoutFields, invoice, orderList, notificationList, addressDetails, deliveryText } from './components/account.js';
 import { showHomepage } from './components/home.js';
-import {calendarSystem,readDate} from './components/calendar.js';
+import {readDate} from './components/calendar.js';
 
 const modal=$('#panel');
 const content=$('#panel-body');
@@ -41,7 +41,6 @@ function appearance() {
   $('.seal').hidden=!logo.hidden;
   if(!logo.hidden) logo.src='/'+state.settings.logo;
   showHomepage();
-  $('#calendar').textContent=calendarSystem()==='persian'?t('Solar calendar'):t('Gregorian calendar');
   collection();
 }
 function closeView() {
@@ -133,7 +132,6 @@ const drawControls=appearanceControls(async prefs=>{
   state.lang=prefs.lang;appearance();await route();
   if(state.me)try{await api('profile','POST',{prefs});}catch(e){notify(t(e.message));}
 });
-$('#calendar').onclick=()=>{localStorage.setItem('simagol.calendar',calendarSystem()==='persian'?'gregory':'persian');appearance();route();};
 $('#favorites').onclick=()=>{state.category='all';$('#search').value='';location.hash=location.hash==='#favorites'?'catalog':'favorites';$('#catalog').scrollIntoView();collection();};
 setupInstall($('#install-app'),(fa,en)=>notify(state.lang==='fa'?fa:en));
 $('.close').onclick=closeView;

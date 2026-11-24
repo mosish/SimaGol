@@ -12,4 +12,4 @@ The five JPEG assets in `public/images/` were generated for this prototype using
 
 Iranian observances use the CC0 Iranian records in [Persian Calendar events](https://github.com/persian-calendar/events), based on the official 1405 Iranian calendar. Lunar month lengths are calendar facts from the [Iranian Islamic date tables](https://github.com/persian-calendar/calendar) and [Qamari](https://github.com/roozbehp/qamari).
 
-The header’s sky-themed appearance switch and globe language selector adapt the controls in [Polad Charkhesh](https://github.com/mosish/polad-charkhesh/tree/main/components/platform).
+Earlier header controls were inspired by [Polad Charkhesh](https://github.com/mosish/polad-charkhesh/tree/main/components/platform).

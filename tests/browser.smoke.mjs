@@ -37,6 +37,11 @@ try {
   assert.equal(await page.locator('.app-tabs a').count(),5);
   assert.equal(await page.locator('.product .pic').first().getAttribute('href'),'#product/lily');
   assert.equal(await page.locator('.brand small').textContent(),'SIMAGOL');
+  assert.equal(await page.locator('header #calendar').count(),0);
+  await page.locator('#theme [value=light]').check();
+  assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
+  await page.locator('#theme [value=auto]').check();
+  assert.equal(await page.locator('#theme [value=auto]').getAttribute('aria-label'),'خودکار');
   await page.locator('#language [value=en]').check();
   await page.waitForFunction(()=>document.documentElement.lang==='en' && document.documentElement.dir==='ltr');
   await page.locator('#theme [value=dark]').check();
